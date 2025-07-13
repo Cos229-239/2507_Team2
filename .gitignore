@@ -1,0 +1,72 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/build
+/captures
+.externalNativeBuild
+.cxx
+
+#Android Studio Files
+*.apk
+*.ap_
+*.aab
+.idea/
+*.ipr
+*.iws
+.navigation/
+captures/
+bin/
+gen/
+out/
+
+# Build files
+.gradle/
+build/
+**/build/
+buildSrc/.gradle/
+gradle-app.setting
+
+# Local config
+local.properties
+
+# Log Files
+*.log
+
+# MacOS files
+.DS_Store
+Thumbs.db
+
+# Keystore files
+*.jks
+*.keystore
+*.key
+
+# Kotlin
+*.class
+*.dex
+*.jar
+*.war
+*.ear
+*.kotlin_module
+**/compose-compiler/
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+fabric.properties
+crashlytics.properties
+firebase-performance.properties
+
+# Misc
+*.hprof
+*.orig
+obj/
+
+# Jetpack
+.kotlinc/
