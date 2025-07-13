@@ -56,7 +56,7 @@ fun BuddyCard() {
                 }
             }
             Text(
-                text = "PlaceHolder Text Goes here",
+                text = "PlaceHolder",
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(start = 8.dp)
