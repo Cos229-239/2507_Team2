@@ -1,5 +1,7 @@
 package com.example.tubebuddy.screens
 
+import android.icu.util.Calendar
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.*
@@ -8,18 +10,27 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tubebuddy.ui.components._log
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,11 +38,22 @@ import kotlinx.coroutines.launch
 @Composable
 fun ScheduleScreen() {
 
+    val context = LocalContext.current
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-
+    var newItemCategoriesSelectedIndex by remember { mutableStateOf(0) }
+    val newItemCategories = listOf("Feed", "Flush", "Medication")
+    val currentTime = Calendar.getInstance()
     var newLogName by remember { mutableStateOf("") }
+    var newNotes by remember { mutableStateOf("") }
+    var repeatSwitchOn by remember { mutableStateOf(false) }
+
+    val timePickerState = rememberTimePickerState(
+        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
+        initialMinute = currentTime.get(Calendar.MINUTE),
+        is24Hour = false,
+    )
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -42,11 +64,10 @@ fun ScheduleScreen() {
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(24.dp)
-            ,
-            onClick = {showBottomSheet = true},
+                .padding(24.dp),
+            onClick = { showBottomSheet = true },
         ) {
-            Text(text="+", fontSize = 24.sp)
+            Text(text = "+", fontSize = 24.sp)
         }
 
         if (showBottomSheet) {
@@ -69,16 +90,79 @@ fun ScheduleScreen() {
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
-                        modifier = Modifier.padding(5.dp)
                     )
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    SingleChoiceSegmentedButtonRow {
+                        newItemCategories.forEachIndexed { index, label ->
+                            SegmentedButton(
+                                shape = SegmentedButtonDefaults.itemShape(
+                                    index = index,
+                                    count = newItemCategories.size
+                                ),
+                                onClick = { newItemCategoriesSelectedIndex = index },
+                                selected = index == newItemCategoriesSelectedIndex,
+                                label = { Text(label) }
+                            )
+                        }
+                    }
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        OutlinedTextField(
+                            value = newLogName,
+                            onValueChange = { newLogName = it },
+                            label = { Text("Enter Title") },
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                    TimeInput(
+                        state = timePickerState
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Repeat   ", // Label text
+                            fontSize = 16.sp,
+                            color = Color.Black
+                        )
+                        Switch(
+                            checked = repeatSwitchOn,
+                            onCheckedChange = { repeatSwitchOn = it }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     OutlinedTextField(
-                        value = newLogName,
-                        onValueChange = {newLogName = it},
-                        label = {Text("Enter Title")},
-                        modifier = Modifier.padding(10.dp)
+                        value = newNotes,
+                        onValueChange = { newNotes = it },
+                        label = { Text("Notes") },
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .height(50.dp)
                     )
-                    Spacer(modifier = Modifier.height(5.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Button(onClick = {
+                        if (newItemCategoriesSelectedIndex == 0){
+                            //feed
+                        }
+                        else if (newItemCategoriesSelectedIndex == 1){
+                            //flush
+                        }
+                        else if (newItemCategoriesSelectedIndex == 2){
+                            //medication
+                        }
+
+                    }) {
+                        Text("Add To List")
+                    }
 
                     Button(onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
