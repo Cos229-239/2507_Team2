@@ -13,9 +13,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
@@ -30,8 +31,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tubebuddy.ui.*
+import com.example.tubebuddy.ui.components.EntryType
+import com.example.tubebuddy.ui.components.EntryUnits
+import com.example.tubebuddy.ui.components.FeedEntry
+import com.example.tubebuddy.ui.components.FeedType
 import com.example.tubebuddy.ui.components._log
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
@@ -44,10 +52,13 @@ fun ScheduleScreen() {
     val scope = rememberCoroutineScope()
     var newItemCategoriesSelectedIndex by remember { mutableStateOf(0) }
     val newItemCategories = listOf("Feed", "Flush", "Medication")
+    var newFeedSelectedIndex by remember { mutableStateOf(0) }
+    val newFeedCategories = listOf("Bolus", "Gravity", "Pump", "Oral")
     val currentTime = Calendar.getInstance()
     var newLogName by remember { mutableStateOf("") }
     var newNotes by remember { mutableStateOf("") }
     var repeatSwitchOn by remember { mutableStateOf(false) }
+    var amountSliderValue by remember { mutableStateOf(50.0f) }
 
     val timePickerState = rememberTimePickerState(
         initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
@@ -108,12 +119,36 @@ fun ScheduleScreen() {
                     }
                         Spacer(modifier = Modifier.height(10.dp))
 
-                        OutlinedTextField(
-                            value = newLogName,
-                            onValueChange = { newLogName = it },
-                            label = { Text("Enter Title") },
+                    SingleChoiceSegmentedButtonRow {
+                        newFeedCategories.forEachIndexed { index, label ->
+                            SegmentedButton(
+                                shape = SegmentedButtonDefaults.itemShape(
+                                    index = index,
+                                    count = newFeedCategories.size
+                                ),
+                                onClick = { newFeedSelectedIndex = index },
+                                selected = index == newFeedSelectedIndex,
+                                label = { Text(label) }
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Slider(
+                        value = amountSliderValue,
+                        onValueChange = {amountSliderValue = it},
+                        valueRange = 0f..100f
+                    )
+                    Text(text = amountSliderValue.toString() + " mL", color = Color.Black)
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    OutlinedTextField(
+                        value = newLogName,
+                        onValueChange = { newLogName = it },
+                        label = { Text("Enter Title") },
+                        colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray)
                         )
-                        Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     TimeInput(
                         state = timePickerState
@@ -143,15 +178,33 @@ fun ScheduleScreen() {
                         value = newNotes,
                         onValueChange = { newNotes = it },
                         label = { Text("Notes") },
+                        colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray),
                         modifier = Modifier
-                            .padding(10.dp)
-                            .height(50.dp)
+                            //.padding(10.dp)
+                            //.height(50.dp)
+
                     )
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Button(onClick = {
+
                         if (newItemCategoriesSelectedIndex == 0){
-                            //feed
+                            //feed entry
+                            val selectedFeedType = if (newFeedSelectedIndex == 0){
+                                FeedType.BOLUS
+                            }
+                            else if (newFeedSelectedIndex == 1){
+                                FeedType.GRAVITY
+                            }
+                            else if (newFeedSelectedIndex == 2){
+                                FeedType.PUMP
+                            }
+                            else {
+                                FeedType.ORAL
+                            }
+
+                            _log.add(FeedEntry(EntryType.FEED, repeatSwitchOn, newLogName, LocalDateTime.of(
+                                LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , amountSliderValue.toDouble(), EntryUnits.mL, newNotes, selectedFeedType))
                         }
                         else if (newItemCategoriesSelectedIndex == 1){
                             //flush
