@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tubebuddy.ui.*
+import com.example.tubebuddy.ui.components.BuddyCard
 import com.example.tubebuddy.ui.components.EntryType
 import com.example.tubebuddy.ui.components.EntryUnits
 import com.example.tubebuddy.ui.components.FeedEntry
@@ -70,7 +71,15 @@ fun ScheduleScreen() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = "Schedule Screen", fontSize = 30.sp)
+        if (!(_log.size >= 1))
+            Text(text = "Schedule Screen", fontSize = 30.sp)
+        else{
+            Column {
+                for (Entry in _log){
+                    BuddyCard(Entry._time.hour.toString(), Entry._title, Entry._type.toString())
+                }
+            }
+        }
 
         FloatingActionButton(
             modifier = Modifier
@@ -86,7 +95,7 @@ fun ScheduleScreen() {
                 onDismissRequest = {
                     showBottomSheet = false
                 },
-                sheetState = sheetState
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ) {
                 // Sheet content
                 Column(
@@ -211,6 +220,12 @@ fun ScheduleScreen() {
                         }
                         else if (newItemCategoriesSelectedIndex == 2){
                             //medication
+                        }
+
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showBottomSheet = false
+                            }
                         }
 
                     }) {
