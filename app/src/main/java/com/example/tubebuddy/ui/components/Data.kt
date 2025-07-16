@@ -1,4 +1,5 @@
 package com.example.tubebuddy.ui.components
+import androidx.compose.runtime.mutableStateListOf
 import java.time.LocalDateTime
 
 enum class EntryType{
@@ -63,4 +64,4 @@ data class MedicationEntry(
     val _medicationName: String
 ) : Entry
 
-val _log = mutableListOf<Entry>()
+val _log = mutableStateListOf<Entry>()

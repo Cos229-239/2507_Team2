@@ -1,16 +1,18 @@
 package com.example.tubebuddy.screens
 
 import android.icu.util.Calendar
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
@@ -19,7 +21,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -95,10 +96,15 @@ fun ScheduleScreen() {
         if (!(_log.size >= 1))
             Text(text = "Schedule Screen", fontSize = 30.sp)
         else{
-            Column {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 //displays each entry in log
-                for (Entry in _log){
-                    BuddyCard(Entry._time.hour.toString(), Entry._title, Entry._type.toString())
+                items(_log) {
+                    entry->BuddyCard(entry._time.hour.toString(), entry._title, entry._type.toString())
                 }
             }
         }
@@ -305,6 +311,8 @@ fun ScheduleScreen() {
                             _log.add(MedicationEntry(EntryType.MEDICINE, false, repeatSwitchOn, newLogName, LocalDateTime.of(
                                 LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , amountSliderValue.toDouble(), EntryUnits.mg, newNotes, MedType.ORAL, selectedMedication))
                         }
+
+                        Toast.makeText(context, _log.size.toString(), Toast.LENGTH_SHORT).show()
 
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
