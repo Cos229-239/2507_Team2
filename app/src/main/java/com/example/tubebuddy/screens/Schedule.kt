@@ -1,7 +1,6 @@
 package com.example.tubebuddy.screens
 
 import android.icu.util.Calendar
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.*
@@ -31,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tubebuddy.ui.*
 import com.example.tubebuddy.ui.components.BuddyCard
 import com.example.tubebuddy.ui.components.EntryType
 import com.example.tubebuddy.ui.components.EntryUnits
@@ -128,20 +126,23 @@ fun ScheduleScreen() {
                     }
                         Spacer(modifier = Modifier.height(10.dp))
 
-                    SingleChoiceSegmentedButtonRow {
-                        newFeedCategories.forEachIndexed { index, label ->
-                            SegmentedButton(
-                                shape = SegmentedButtonDefaults.itemShape(
-                                    index = index,
-                                    count = newFeedCategories.size
-                                ),
-                                onClick = { newFeedSelectedIndex = index },
-                                selected = index == newFeedSelectedIndex,
-                                label = { Text(label) }
-                            )
+
+                    if (newItemCategoriesSelectedIndex == 0){
+                        SingleChoiceSegmentedButtonRow {
+                            newFeedCategories.forEachIndexed { index, label ->
+                                SegmentedButton(
+                                    shape = SegmentedButtonDefaults.itemShape(
+                                        index = index,
+                                        count = newFeedCategories.size
+                                    ),
+                                    onClick = { newFeedSelectedIndex = index },
+                                    selected = index == newFeedSelectedIndex,
+                                    label = { Text(label) }
+                                )
+                            }
                         }
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
 
                     Slider(
                         value = amountSliderValue,
@@ -212,11 +213,22 @@ fun ScheduleScreen() {
                                 FeedType.ORAL
                             }
 
-                            _log.add(FeedEntry(EntryType.FEED, repeatSwitchOn, newLogName, LocalDateTime.of(
-                                LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , amountSliderValue.toDouble(), EntryUnits.mL, newNotes, selectedFeedType))
+                            _log.add(FeedEntry(
+                                EntryType.FEED,
+                                false,
+                                repeatSwitchOn,
+                                newLogName,
+                                LocalDateTime.of(
+                                    LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute),
+                                amountSliderValue.toDouble(),
+                                EntryUnits.mL,
+                                newNotes
+                            ))
                         }
                         else if (newItemCategoriesSelectedIndex == 1){
                             //flush
+                            _log.add(FeedEntry(EntryType.FLUSH, false, repeatSwitchOn, newLogName, LocalDateTime.of(
+                                LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , amountSliderValue.toDouble(), EntryUnits.mL, newNotes))
                         }
                         else if (newItemCategoriesSelectedIndex == 2){
                             //medication
