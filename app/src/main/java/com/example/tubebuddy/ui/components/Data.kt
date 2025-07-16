@@ -59,7 +59,8 @@ data class MedicationEntry(
     override val _amount: Double,
     override val _unit: EntryUnits,
     override val _notes: String,
-    val _medType: MedType
+    val _medType: MedType,
+    val _medicationName: String
 ) : Entry
 
 val _log = mutableListOf<Entry>()
