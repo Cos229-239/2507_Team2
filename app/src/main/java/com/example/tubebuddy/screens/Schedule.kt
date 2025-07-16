@@ -312,8 +312,6 @@ fun ScheduleScreen() {
                                 LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , amountSliderValue.toDouble(), EntryUnits.mg, newNotes, MedType.ORAL, selectedMedication))
                         }
 
-                        Toast.makeText(context, _log.size.toString(), Toast.LENGTH_SHORT).show()
-
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
                                 showBottomSheet = false
