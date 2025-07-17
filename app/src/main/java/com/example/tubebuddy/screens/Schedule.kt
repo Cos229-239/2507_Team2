@@ -80,6 +80,7 @@ fun ScheduleScreen() {
     var newNotes by remember { mutableStateOf("") }
     var repeatSwitchOn by remember { mutableStateOf(false) }
     var amountSliderValue by remember { mutableStateOf(50.0f) }
+    var medAmountSliderValue by remember { mutableStateOf(5.0f) }
 
     val timePickerState = rememberTimePickerState(
         initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
@@ -215,14 +216,29 @@ fun ScheduleScreen() {
                         Spacer(modifier = Modifier.height(10.dp))
                     }
 
-                    //-----------mL Amount Slider
-                    Slider(
-                        value = amountSliderValue,
-                        onValueChange = {amountSliderValue = it},
-                        valueRange = 0f..100f
-                    )
-                    Text(text = amountSliderValue.toString() + " mL", color = Color.Black)
-                    Spacer(modifier = Modifier.height(10.dp))
+                    if (newItemCategoriesSelectedIndex == 0 || newItemCategoriesSelectedIndex == 1) {
+
+                        //-----------mL Amount Slider
+                        Slider(
+                            value = amountSliderValue,
+                            onValueChange = { amountSliderValue = it },
+                            valueRange = 0f..100f
+                        )
+                        Text(text = amountSliderValue.toString() + " mL", color = Color.Black)
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+
+                    else {
+
+                        //-----------mg (medication) Amount Slider
+                        Slider(
+                            value = medAmountSliderValue,
+                            onValueChange = { medAmountSliderValue = it },
+                            valueRange = 0f..10f
+                        )
+                        Text(text = medAmountSliderValue.toString() + " mg", color = Color.Black)
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
 
                     //-----------User Title Field
                     OutlinedTextField(
@@ -265,9 +281,6 @@ fun ScheduleScreen() {
                         label = { Text("Notes") },
                         colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray),
                         modifier = Modifier
-                            //.padding(10.dp)
-                            //.height(50.dp)
-
                     )
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -309,7 +322,7 @@ fun ScheduleScreen() {
                         else if (newItemCategoriesSelectedIndex == 2){
                             //medication
                             _log.add(MedicationEntry(EntryType.MEDICINE, false, repeatSwitchOn, newLogName, LocalDateTime.of(
-                                LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , amountSliderValue.toDouble(), EntryUnits.mg, newNotes, MedType.ORAL, selectedMedication))
+                                LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , medAmountSliderValue.toDouble(), EntryUnits.mg, newNotes, MedType.ORAL, selectedMedication))
                         }
 
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
