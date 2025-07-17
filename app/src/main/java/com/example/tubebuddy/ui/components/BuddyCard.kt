@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun BuddyCard(dateTime: String, title: String, description: String) {
+fun BuddyCard(dateTime: String, title: String, description: String, modifier: Modifier = Modifier) {
 
     var displayTime by remember { mutableStateOf(dateTime.toInt()) }
     var displayTimeString by remember { mutableStateOf("") }
@@ -43,9 +43,7 @@ fun BuddyCard(dateTime: String, title: String, description: String) {
 
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        modifier = Modifier
-            .size(width = 380.dp, height = 94.dp)
-            .padding(bottom = 18.dp),
+        modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )

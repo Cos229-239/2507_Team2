@@ -2,6 +2,7 @@ package com.example.tubebuddy.screens
 
 import android.icu.util.Calendar
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.*
@@ -45,9 +46,30 @@ import com.example.tubebuddy.ui.components.FlushEntry
 import com.example.tubebuddy.ui.components.MedType
 import com.example.tubebuddy.ui.components.MedicationEntry
 import com.example.tubebuddy.ui.components._log
+import com.example.tubebuddy.ui.components.Entry
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
+
+//Detail Sheet
+@Composable
+fun EntryDetailSheet(entry: Entry) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        Text("Title: ${entry._title}", color = Color.Black)
+        Text("Type: ${entry._type}", color = Color.Black)
+        Text("Time: ${entry._time}", color = Color.Black)
+        Text("Amount: ${entry._amount} ${entry._unit}", color = Color.Black)
+        Text("Notes: ${entry._notes}", color = Color.Black)
+
+        if (entry is MedicationEntry) {
+            Text("Medication: ${entry._medicationName}", color = Color.Black)
+            Text("Med Type: ${entry._medType}", color = Color.Black)
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
@@ -60,6 +82,9 @@ fun ScheduleScreen() {
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+
+    //info sheet
+    var tappedCard by remember { mutableStateOf<Entry?>(null) }
 
     //Item Category Segmented Button
     var newItemCategoriesSelectedIndex by remember { mutableStateOf(0) }
@@ -105,7 +130,8 @@ fun ScheduleScreen() {
             ) {
                 //displays each entry in log
                 items(_log) {
-                    entry->BuddyCard(entry._time.hour.toString(), entry._title, entry._type.toString())
+                    entry->BuddyCard(entry._time.hour.toString(), entry._title, entry._type.toString(), modifier = Modifier.size(width = 380.dp, height = 94.dp)
+                    .padding(bottom = 18.dp).clickable { tappedCard = entry })
                 }
             }
         }
@@ -118,6 +144,16 @@ fun ScheduleScreen() {
             onClick = { showBottomSheet = true },
         ) {
             Text(text = "+", fontSize = 24.sp)
+        }
+
+        //sheet if item is tapped
+        if (tappedCard!=null){
+            ModalBottomSheet(
+                onDismissRequest = { tappedCard = null },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+            ) {
+                EntryDetailSheet(tappedCard!!)
+            }
         }
 
         //--------------------Begin New Item Sheet--------------------
