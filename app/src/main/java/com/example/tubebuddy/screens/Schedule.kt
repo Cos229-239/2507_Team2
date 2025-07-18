@@ -8,12 +8,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
@@ -53,20 +59,41 @@ import java.time.LocalDateTime
 
 //Detail Sheet
 @Composable
-fun EntryDetailSheet(entry: Entry) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        Text("Title: ${entry._title}", color = Color.Black)
-        Text("Type: ${entry._type}", color = Color.Black)
-        Text("Time: ${entry._time}", color = Color.Black)
-        Text("Amount: ${entry._amount} ${entry._unit}", color = Color.Black)
-        Text("Notes: ${entry._notes}", color = Color.Black)
+fun EntryDetailSheet(entry: Entry, onDelete:()->Unit) {
 
-        if (entry is MedicationEntry) {
-            Text("Medication: ${entry._medicationName}", color = Color.Black)
-            Text("Med Type: ${entry._medType}", color = Color.Black)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.45f)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("Title: ${entry._title}", color = Color.Black)
+            Text("Type: ${entry._type}", color = Color.Black)
+            Text("Time: ${entry._time}", color = Color.Black)
+            Text("Amount: ${entry._amount} ${entry._unit}", color = Color.Black)
+            Text("Notes: ${entry._notes}", color = Color.Black)
+
+            if (entry is MedicationEntry) {
+                Text("Medication: ${entry._medicationName}", color = Color.Black)
+                Text("Med Type: ${entry._medType}", color = Color.Black)
+            }
+        }
+
+        FloatingActionButton(
+            onClick = onDelete,
+            containerColor = Color.Red,
+            contentColor = Color.White,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 30.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = "Delete Schedule Item"
+            )
         }
     }
 }
@@ -120,7 +147,7 @@ fun ScheduleScreen() {
     ) {
         //if log is empty display basic text
         if (!(_log.size >= 1))
-            Text(text = "Schedule Screen", fontSize = 30.sp)
+            Text(text = "No Scheduled Items", fontSize = 30.sp, color = Color.Black)
         else{
             LazyColumn(
                 modifier = Modifier
@@ -130,8 +157,10 @@ fun ScheduleScreen() {
             ) {
                 //displays each entry in log
                 items(_log) {
-                    entry->BuddyCard(entry._time.hour.toString(), entry._title, entry._type.toString(), modifier = Modifier.size(width = 380.dp, height = 94.dp)
-                    .padding(bottom = 18.dp).clickable { tappedCard = entry })
+                    entry->ScheduleBuddyCard(entry._time.hour.toString(), entry._title, entry._type.toString(), modifier = Modifier
+                    .size(width = 380.dp, height = 94.dp)
+                    .padding(bottom = 18.dp)
+                    .clickable { tappedCard = entry })
                 }
             }
         }
@@ -152,7 +181,11 @@ fun ScheduleScreen() {
                 onDismissRequest = { tappedCard = null },
                 sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
             ) {
-                EntryDetailSheet(tappedCard!!)
+                EntryDetailSheet(tappedCard!!,
+                    onDelete = {
+                        _log.remove(tappedCard)
+                        tappedCard = null;
+                    })
             }
         }
 
@@ -385,5 +418,77 @@ fun ScheduleScreen() {
             }
         }
         //--------------------End New Item Sheet--------------------
+    }
+}
+
+//Generate Schedule Buddy Cards
+@Composable
+fun ScheduleBuddyCard(dateTime: String, title: String, description: String, modifier: Modifier = Modifier) {
+
+    var displayTime by remember { mutableStateOf(dateTime.toInt()) }
+    var displayTimeString by remember { mutableStateOf("") }
+
+    if (displayTime > 12){
+        displayTime-=12
+        displayTimeString = displayTime.toString() + 'p'
+    }
+    else if (displayTime==12){
+        displayTimeString = displayTime.toString() + 'p'
+    }
+    else if (displayTime==0){
+        displayTimeString = "12a"
+    }
+    else{
+        displayTimeString = displayTime.toString() + 'a'
+    }
+
+    Card(
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Card(
+                modifier = Modifier
+                    .size(width = 64.dp, height = 56.dp)
+                    .padding(start = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.onBackground
+                )
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+
+                ) {
+
+                    Text(
+                        text = displayTimeString,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                    )
+                }
+            }
+            Column {
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+                Text(
+                    text = description,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+        }
     }
 }

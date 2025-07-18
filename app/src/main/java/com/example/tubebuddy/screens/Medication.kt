@@ -31,7 +31,20 @@ fun MedicationScreen() {
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(top = 8.dp)
             )
-            BuddyCard("9am", "Bolus Feed", "aljkshdlkas")
+            BuddyCard()
+            BuddyCard()
+            BuddyCard()
+            BuddyCard()
+//            Card(
+//                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+//                modifier = Modifier
+//                    .size(width = 360.dp, height = 360.dp),
+//                colors = CardDefaults.cardColors(
+//                    containerColor = MaterialTheme.colorScheme.primary
+//                )
+//            ) {
+//
+//            }
         }
     }
 }
