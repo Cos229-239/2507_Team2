@@ -1,7 +1,7 @@
 package com.example.tubebuddy.screens
 
+import android.graphics.Paint.Align
 import android.icu.util.Calendar
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -43,7 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tubebuddy.ui.components.BuddyCard
 import com.example.tubebuddy.ui.components.EntryType
 import com.example.tubebuddy.ui.components.EntryUnits
 import com.example.tubebuddy.ui.components.FeedEntry
@@ -51,15 +51,19 @@ import com.example.tubebuddy.ui.components.FeedType
 import com.example.tubebuddy.ui.components.FlushEntry
 import com.example.tubebuddy.ui.components.MedType
 import com.example.tubebuddy.ui.components.MedicationEntry
-import com.example.tubebuddy.ui.components._log
+import com.example.tubebuddy.ui.components._schedule
 import com.example.tubebuddy.ui.components.Entry
+import com.example.tubebuddy.ui.components._entryLog
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 //Detail Sheet
 @Composable
-fun EntryDetailSheet(entry: Entry, onDelete:()->Unit) {
+fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
+
+    val actualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
+    val medActualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
 
     Box(
         modifier = Modifier
@@ -80,20 +84,65 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit) {
                 Text("Medication: ${entry._medicationName}", color = Color.Black)
                 Text("Med Type: ${entry._medType}", color = Color.Black)
             }
+
+            if (entry._type == EntryType.MEDICINE){
+
+                Slider(
+                    value = medActualAmountSliderValue.value,
+                    onValueChange = { medActualAmountSliderValue.value = it },
+                    valueRange = 0f..10f
+                )
+                Text(text = medActualAmountSliderValue.value.toString() + " mg", color = Color.Black)
+            }
+            else{
+
+                Slider(
+                    value = actualAmountSliderValue.value,
+                    onValueChange = { actualAmountSliderValue.value = it },
+                    valueRange = 0f..100f
+                )
+                Text(text = actualAmountSliderValue.value.toString() + " mL", color = Color.Black)
+            }
         }
 
-        FloatingActionButton(
-            onClick = onDelete,
-            containerColor = Color.Red,
-            contentColor = Color.White,
+        Row (
             modifier = Modifier
+                .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 30.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Delete,
-                contentDescription = "Delete Schedule Item"
-            )
+        ){
+            Button(
+                onClick = {
+                    if (entry is FeedEntry || entry is FlushEntry)
+                        _entryLog.add(FeedEntry(entry._type, _complete = true, _repeats = false, entry._title, entry._time, actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes))
+                    if (entry is MedicationEntry)
+                        _entryLog.add(MedicationEntry(entry._type, _complete = true, _repeats = false, entry._title, entry._time, actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._medType, entry._medicationName))
+
+                    onDismiss()
+                },
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = Color.Green,
+                    contentColor = Color.White,
+                ), modifier = Modifier.weight(0.75f)
+                    .padding(16.dp)) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "  Quick Add to Log"
+                )
+                Text("Quick Add")
+            }
+
+            Button(
+                onClick = onDelete,
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = Color.Red,
+                    contentColor = Color.White,
+            ), modifier = Modifier.weight(0.25f)
+                    .padding(16.dp)) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "Delete"
+                )
+            }
         }
     }
 }
@@ -146,7 +195,7 @@ fun ScheduleScreen() {
         contentAlignment = Alignment.Center
     ) {
         //if log is empty display basic text
-        if (!(_log.size >= 1))
+        if (!(_schedule.size >= 1))
             Text(text = "No Scheduled Items", fontSize = 30.sp, color = Color.Black)
         else{
             LazyColumn(
@@ -156,7 +205,7 @@ fun ScheduleScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 //displays each entry in log
-                items(_log) {
+                items(_schedule) {
                     entry->ScheduleBuddyCard(entry._time.hour.toString(), entry._title, entry._type.toString(), modifier = Modifier
                     .size(width = 380.dp, height = 94.dp)
                     .padding(bottom = 18.dp)
@@ -183,8 +232,11 @@ fun ScheduleScreen() {
             ) {
                 EntryDetailSheet(tappedCard!!,
                     onDelete = {
-                        _log.remove(tappedCard)
+                        _schedule.remove(tappedCard)
                         tappedCard = null;
+                    },
+                    onDismiss = {
+                        tappedCard = null
                     })
             }
         }
@@ -215,7 +267,11 @@ fun ScheduleScreen() {
                     Spacer(modifier = Modifier.height(15.dp))
 
                     //-----------Entry Category Segmented Button
-                    SingleChoiceSegmentedButtonRow {
+                    SingleChoiceSegmentedButtonRow(
+                        modifier = Modifier
+                            .fillMaxWidth(.9f)
+                            .align(Alignment.CenterHorizontally)
+                    ) {
                         newItemCategories.forEachIndexed { index, label ->
                             SegmentedButton(
                                 shape = SegmentedButtonDefaults.itemShape(
@@ -233,7 +289,11 @@ fun ScheduleScreen() {
 
                     //-----------Feed Type Segmented Button
                     if (newItemCategoriesSelectedIndex == 0){
-                        SingleChoiceSegmentedButtonRow {
+                        SingleChoiceSegmentedButtonRow(
+                            modifier = Modifier
+                                .fillMaxWidth(.9f)
+                                .align(Alignment.CenterHorizontally)
+                        ) {
                             newFeedCategories.forEachIndexed { index, label ->
                                 SegmentedButton(
                                     shape = SegmentedButtonDefaults.itemShape(
@@ -371,7 +431,7 @@ fun ScheduleScreen() {
                                 FeedType.ORAL
                             }
 
-                            _log.add(FeedEntry(
+                            _schedule.add(FeedEntry(
                                 EntryType.FEED,
                                 false,
                                 repeatSwitchOn,
@@ -385,12 +445,12 @@ fun ScheduleScreen() {
                         }
                         else if (newItemCategoriesSelectedIndex == 1){
                             //flush
-                            _log.add(FlushEntry(EntryType.FLUSH, false, repeatSwitchOn, newLogName, LocalDateTime.of(
+                            _schedule.add(FlushEntry(EntryType.FLUSH, false, repeatSwitchOn, newLogName, LocalDateTime.of(
                                 LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , amountSliderValue.toDouble(), EntryUnits.mL, newNotes))
                         }
                         else if (newItemCategoriesSelectedIndex == 2){
                             //medication
-                            _log.add(MedicationEntry(EntryType.MEDICINE, false, repeatSwitchOn, newLogName, LocalDateTime.of(
+                            _schedule.add(MedicationEntry(EntryType.MEDICINE, false, repeatSwitchOn, newLogName, LocalDateTime.of(
                                 LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , medAmountSliderValue.toDouble(), EntryUnits.mg, newNotes, MedType.ORAL, selectedMedication))
                         }
 

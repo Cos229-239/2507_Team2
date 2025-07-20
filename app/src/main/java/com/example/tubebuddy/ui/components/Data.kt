@@ -64,4 +64,5 @@ data class MedicationEntry(
     val _medicationName: String
 ) : Entry
 
-val _log = mutableStateListOf<Entry>()
+val _schedule = mutableStateListOf<Entry>()
+val _entryLog = mutableStateListOf<Entry>()

@@ -34,7 +34,7 @@ val bottomNavItems = listOf(
         route = Screen.Schedule.route
     ),
     BottomNavItem(
-        title = "Feeding Log",
+        title = "Log",
         icon = Icons.Rounded.DateRange,
         route = Screen.FeedingLog.route
     ),
