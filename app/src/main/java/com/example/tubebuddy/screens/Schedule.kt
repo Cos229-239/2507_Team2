@@ -58,6 +58,7 @@ import com.example.tubebuddy.ui.components._entryLog
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.math.roundToInt
 
 //Schedule Detail Sheet
 @Composable
@@ -129,18 +130,20 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                 Slider(
                     value = medActualAmountSliderValue.value,
                     onValueChange = { medActualAmountSliderValue.value = it },
-                    valueRange = 0f..10f
+                    valueRange = 0f..10f,
+                    steps = 9
                 )
-                Text(text = medActualAmountSliderValue.value.toString() + " mg", color = Color.Black)
+                Text(text = medActualAmountSliderValue.value.roundToInt().toString() + " mg", color = Color.Black)
             }
             else{
 
                 Slider(
                     value = actualAmountSliderValue.value,
                     onValueChange = { actualAmountSliderValue.value = it },
-                    valueRange = 0f..100f
+                    valueRange = 0f..100f,
+                    steps = 99
                 )
-                Text(text = actualAmountSliderValue.value.toString() + " mL", color = Color.Black)
+                Text(text = actualAmountSliderValue.value.roundToInt().toString() + " mL", color = Color.Black)
             }
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -391,9 +394,10 @@ fun ScheduleScreen() {
                         Slider(
                             value = amountSliderValue,
                             onValueChange = { amountSliderValue = it },
-                            valueRange = 0f..100f
+                            valueRange = 0f..100f,
+                            steps = 99
                         )
-                        Text(text = amountSliderValue.toString() + " mL", color = Color.Black)
+                        Text(text = amountSliderValue.roundToInt().toString() + " mL", color = Color.Black)
                         Spacer(modifier = Modifier.height(10.dp))
                     }
 
@@ -403,9 +407,10 @@ fun ScheduleScreen() {
                         Slider(
                             value = medAmountSliderValue,
                             onValueChange = { medAmountSliderValue = it },
-                            valueRange = 0f..10f
+                            valueRange = 0f..10f,
+                            steps = 9
                         )
-                        Text(text = medAmountSliderValue.toString() + " mg", color = Color.Black)
+                        Text(text = medAmountSliderValue.roundToInt().toString() + " mg", color = Color.Black)
                         Spacer(modifier = Modifier.height(10.dp))
                     }
 
