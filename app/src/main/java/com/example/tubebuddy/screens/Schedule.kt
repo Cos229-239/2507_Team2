@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -39,6 +40,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -119,8 +121,8 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             Text("Notes: ${entry._notes}", color = Color.Black)
 
             if (entry is MedicationEntry) {
-                Text("Medication: ${entry._medicationName}", color = Color.Black)
-                Text("Med Type: ${entry._medType}", color = Color.Black)
+                Text("Medication: (" + "${entry._medType}" + ") ${entry._medicationName}", color = Color.Black)
+                //Text("Med Type: ${entry._medType}", color = Color.Black)
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -158,15 +160,18 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                     if (entry is FeedEntry || entry is FlushEntry)
                         _entryLog.add(FeedEntry(entry._type, _complete = true, _repeats = false, entry._title, entry._time, actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes))
                     if (entry is MedicationEntry)
-                        _entryLog.add(MedicationEntry(entry._type, _complete = true, _repeats = false, entry._title, entry._time, actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._medType, entry._medicationName))
+                        _entryLog.add(MedicationEntry(entry._type, _complete = true, _repeats = false, entry._title, entry._time, medActualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._medType, entry._medicationName))
 
                     onDismiss()
                 },
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                    containerColor = Color.Green,
+                    containerColor = Color(81,130,66),
                     contentColor = Color.White,
                 ), modifier = Modifier.weight(0.75f)
-                    .padding(16.dp)) {
+                    .padding(16.dp)
+                    .height(50.dp)
+                    .shadow(5.dp, shape = RoundedCornerShape(8.dp)), shape = RoundedCornerShape(8.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = "  Quick Add to Log"
@@ -177,10 +182,12 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             Button(
                 onClick = onDelete,
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                    containerColor = Color.Red,
+                    containerColor = Color(186,26,26),
                     contentColor = Color.White,
             ), modifier = Modifier.weight(0.25f)
-                    .padding(16.dp)) {
+                .padding(16.dp)
+                .height(50.dp)
+                .shadow(5.dp, shape = RoundedCornerShape(8.dp)), shape = RoundedCornerShape(8.dp)) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
                     contentDescription = "Delete"
