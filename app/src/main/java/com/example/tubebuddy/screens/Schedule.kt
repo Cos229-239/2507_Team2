@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -58,12 +59,26 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-//Detail Sheet
+//Schedule Detail Sheet
 @Composable
 fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
     val actualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
     val medActualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
+    var timeString by remember { mutableStateOf("") }
+
+    if (entry._time.hour == 0){
+        timeString = "12:" + entry._time.minute.toString() + " AM"
+    }
+    else if (entry._time.hour > 12){
+        timeString = (entry._time.hour-12).toString() + ":" + entry._time.minute.toString() + " PM"
+    }
+    else if (entry._time.hour == 12){
+        timeString = "12:" + entry._time.minute.toString() + " PM"
+    }
+    else{
+        timeString = entry._time.hour.toString() + ":" + entry._time.minute.toString() + " AM"
+    }
 
     Box(
         modifier = Modifier
@@ -74,9 +89,31 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Title: ${entry._title}", color = Color.Black)
+
+            Card (modifier = Modifier
+                .size(100.dp, 80.dp), colors = CardDefaults.cardColors(containerColor = Color(31,46,68)), elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)){
+                Column (
+                    modifier = Modifier
+                        .fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(text = entry._time.monthValue.toString() + '/' + entry._time.dayOfMonth,
+                        fontSize = 25.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold)
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(text = timeString,
+                        fontSize = 18.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text("Title: ${entry._title}", color = Color.Black, fontWeight = FontWeight.Medium)
             Text("Type: ${entry._type}", color = Color.Black)
-            Text("Time: ${entry._time}", color = Color.Black)
             Text("Amount: ${entry._amount} ${entry._unit}", color = Color.Black)
             Text("Notes: ${entry._notes}", color = Color.Black)
 
@@ -84,6 +121,8 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                 Text("Medication: ${entry._medicationName}", color = Color.Black)
                 Text("Med Type: ${entry._medType}", color = Color.Black)
             }
+
+            Spacer(modifier = Modifier.height(10.dp))
 
             if (entry._type == EntryType.MEDICINE){
 
@@ -103,6 +142,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                 )
                 Text(text = actualAmountSliderValue.value.toString() + " mL", color = Color.Black)
             }
+            Spacer(modifier = Modifier.height(10.dp))
         }
 
         Row (
@@ -460,7 +500,7 @@ fun ScheduleScreen() {
                             }
                         }
 
-                    }) {
+                    }, colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray, contentColor = Color.White)) {
                         Text("Add To List")
                     }
 
@@ -471,7 +511,7 @@ fun ScheduleScreen() {
                                 showBottomSheet = false
                             }
                         }
-                    }) {
+                    }, colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray, contentColor = Color.White)) {
                         Text("Cancel")
                     }
                 }
@@ -489,8 +529,7 @@ fun ScheduleBuddyCard(dateTime: String, title: String, description: String, modi
     var displayTimeString by remember { mutableStateOf("") }
 
     if (displayTime > 12){
-        displayTime-=12
-        displayTimeString = displayTime.toString() + 'p'
+        displayTimeString = (displayTime-12).toString() + 'p'
     }
     else if (displayTime==12){
         displayTimeString = displayTime.toString() + 'p'
