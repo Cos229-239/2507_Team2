@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -69,18 +70,26 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
     val actualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
     val medActualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
     var timeString by remember { mutableStateOf("") }
+    var minuteString by remember { mutableStateOf("") }
 
-    if (entry._time.hour == 0){
-        timeString = "12:" + entry._time.minute.toString() + " AM"
-    }
-    else if (entry._time.hour > 12){
-        timeString = (entry._time.hour-12).toString() + ":" + entry._time.minute.toString() + " PM"
-    }
-    else if (entry._time.hour == 12){
-        timeString = "12:" + entry._time.minute.toString() + " PM"
+    if (entry._time.minute < 10){
+        minuteString = '0' + entry._time.minute.toString()
     }
     else{
-        timeString = entry._time.hour.toString() + ":" + entry._time.minute.toString() + " AM"
+        minuteString = entry._time.minute.toString()
+    }
+
+    if (entry._time.hour == 0){
+        timeString = "12:" + minuteString + " AM"
+    }
+    else if (entry._time.hour > 12){
+        timeString = (entry._time.hour-12).toString() + ":" + minuteString + " PM"
+    }
+    else if (entry._time.hour == 12){
+        timeString = "12:" + minuteString + " PM"
+    }
+    else{
+        timeString = entry._time.hour.toString() + ":" + minuteString + " AM"
     }
 
     Box(
@@ -176,7 +185,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                     imageVector = Icons.Filled.Add,
                     contentDescription = "  Quick Add to Log"
                 )
-                Text("Quick Add")
+                Text("  Quick Log")
             }
 
             Button(
@@ -309,7 +318,7 @@ fun ScheduleScreen() {
 
                     //-----------Title
                     Text(
-                        text = "Create New Event",
+                        text = "New Schedule Entry",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
@@ -360,7 +369,7 @@ fun ScheduleScreen() {
                     }
 
                     //-----------Medication Dropdown
-                    
+
                     if (newItemCategoriesSelectedIndex == 2){
 
                         ExposedDropdownMenuBox(
@@ -465,66 +474,137 @@ fun ScheduleScreen() {
                     )
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    //-----------Add Item Button
-                    Button(onClick = {
+                    Row (
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        //-----------Add Item Button
+                        Button(
+                            onClick = {
 
-                        if (newItemCategoriesSelectedIndex == 0){
-                            //feed entry
-                            val selectedFeedType = if (newFeedSelectedIndex == 0){
-                                FeedType.BOLUS
-                            }
-                            else if (newFeedSelectedIndex == 1){
-                                FeedType.GRAVITY
-                            }
-                            else if (newFeedSelectedIndex == 2){
-                                FeedType.PUMP
-                            }
-                            else {
-                                FeedType.ORAL
-                            }
+                                if (newItemCategoriesSelectedIndex == 0) {
+                                    //feed entry
+                                    val selectedFeedType = if (newFeedSelectedIndex == 0) {
+                                        FeedType.BOLUS
+                                    } else if (newFeedSelectedIndex == 1) {
+                                        FeedType.GRAVITY
+                                    } else if (newFeedSelectedIndex == 2) {
+                                        FeedType.PUMP
+                                    } else {
+                                        FeedType.ORAL
+                                    }
 
-                            _schedule.add(FeedEntry(
-                                EntryType.FEED,
-                                false,
-                                repeatSwitchOn,
-                                newLogName,
-                                LocalDateTime.of(
-                                    LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute),
-                                amountSliderValue.toDouble(),
-                                EntryUnits.mL,
-                                newNotes
-                            ))
-                        }
-                        else if (newItemCategoriesSelectedIndex == 1){
-                            //flush
-                            _schedule.add(FlushEntry(EntryType.FLUSH, false, repeatSwitchOn, newLogName, LocalDateTime.of(
-                                LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , amountSliderValue.toDouble(), EntryUnits.mL, newNotes))
-                        }
-                        else if (newItemCategoriesSelectedIndex == 2){
-                            //medication
-                            _schedule.add(MedicationEntry(EntryType.MEDICINE, false, repeatSwitchOn, newLogName, LocalDateTime.of(
-                                LocalDate.now().year,LocalDate.now().month,LocalDate.now().dayOfMonth,timePickerState.hour,timePickerState.minute) , medAmountSliderValue.toDouble(), EntryUnits.mg, newNotes, MedType.ORAL, selectedMedication))
+                                    _schedule.add(
+                                        FeedEntry(
+                                            EntryType.FEED,
+                                            false,
+                                            repeatSwitchOn,
+                                            newLogName,
+                                            LocalDateTime.of(
+                                                LocalDate.now().year,
+                                                LocalDate.now().month,
+                                                LocalDate.now().dayOfMonth,
+                                                timePickerState.hour,
+                                                timePickerState.minute
+                                            ),
+                                            amountSliderValue.toDouble(),
+                                            EntryUnits.mL,
+                                            newNotes
+                                        )
+                                    )
+                                } else if (newItemCategoriesSelectedIndex == 1) {
+                                    //flush
+                                    _schedule.add(
+                                        FlushEntry(
+                                            EntryType.FLUSH,
+                                            false,
+                                            repeatSwitchOn,
+                                            newLogName,
+                                            LocalDateTime.of(
+                                                LocalDate.now().year,
+                                                LocalDate.now().month,
+                                                LocalDate.now().dayOfMonth,
+                                                timePickerState.hour,
+                                                timePickerState.minute
+                                            ),
+                                            amountSliderValue.toDouble(),
+                                            EntryUnits.mL,
+                                            newNotes
+                                        )
+                                    )
+                                } else if (newItemCategoriesSelectedIndex == 2) {
+                                    //medication
+                                    _schedule.add(
+                                        MedicationEntry(
+                                            EntryType.MEDICINE,
+                                            false,
+                                            repeatSwitchOn,
+                                            newLogName,
+                                            LocalDateTime.of(
+                                                LocalDate.now().year,
+                                                LocalDate.now().month,
+                                                LocalDate.now().dayOfMonth,
+                                                timePickerState.hour,
+                                                timePickerState.minute
+                                            ),
+                                            medAmountSliderValue.toDouble(),
+                                            EntryUnits.mg,
+                                            newNotes,
+                                            MedType.ORAL,
+                                            selectedMedication
+                                        )
+                                    )
+                                }
+
+                                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        showBottomSheet = false
+                                    }
+                                }
+
+                            },
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = Color(81, 130, 66),
+                                contentColor = Color.White,
+                            ),
+                            modifier = Modifier.weight(0.75f)
+                                .padding(16.dp)
+                                .height(50.dp)
+                                .shadow(5.dp, shape = RoundedCornerShape(8.dp)),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = "Add To Schedule"
+                            )
+                            Text("  Add To Schedule")
                         }
 
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showBottomSheet = false
-                            }
+                        //-----------Cancel Button
+                        Button(
+                            onClick = {
+                                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        showBottomSheet = false
+                                    }
+                                }
+                            },
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = Color(186, 26, 26),
+                                contentColor = Color.White,
+                            ),
+                            modifier = Modifier.weight(0.25f)
+                                .padding(16.dp)
+                                .height(50.dp)
+                                .shadow(5.dp, shape = RoundedCornerShape(8.dp)),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "Cancel"
+                            )
+                            Text("Cancel")
                         }
-
-                    }, colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray, contentColor = Color.White)) {
-                        Text("Add To List")
-                    }
-
-                    //-----------Cancel Button
-                    Button(onClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showBottomSheet = false
-                            }
-                        }
-                    }, colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray, contentColor = Color.White)) {
-                        Text("Cancel")
                     }
                 }
             }
