@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +46,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tubebuddy.ui.components.BuddyCard
+import com.example.tubebuddy.ui.components.completedTasks
+import com.example.tubebuddy.ui.components.tasks
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -102,35 +104,6 @@ fun CreateTaskItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SiteCareScreen() {
-    val tasks = remember {
-        mutableStateListOf(
-            TaskItemData(1, "Clean Tube Site", false),
-            TaskItemData(2, "Redness/Granulation Check", false),
-            TaskItemData(3, "Apply Barrier Cream", false),
-            TaskItemData(4, "Change Dressing", false)
-        )
-    }
-
-    val completedTasks = remember { mutableStateListOf(
-        CompletedTaskItemData(
-            1,
-            "07-08",
-            "4 out of 4 tasks complete",
-            "Notes: Everything looks okay today"
-        ),
-        CompletedTaskItemData(
-            2,
-            "07-07",
-            "4 out of 4 tasks complete",
-            "Notes: Need to keep an eye on..."
-        ),
-        CompletedTaskItemData(
-            3,
-            "07-06",
-            "3 out of 4 tasks complete",
-            "Notes:")
-    )}
-
     val allTasksComplete by remember {
         derivedStateOf {
             tasks.all { it.isChecked }
@@ -166,7 +139,7 @@ fun SiteCareScreen() {
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
-                    .padding(top = 8.dp, start = 8.dp)
+                    .padding(top = 16.dp, start = 16.dp)
                     .fillMaxWidth(),
                 textAlign = TextAlign.Start
             )
@@ -174,8 +147,8 @@ fun SiteCareScreen() {
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
-                    .height(280.dp),
+                    .fillMaxHeight(.5f)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
@@ -227,7 +200,7 @@ fun SiteCareScreen() {
             }
             Spacer(modifier = Modifier.height(8.dp))
             Column(
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp)
             ) {
                 Text(
                     text = "Recently Completed:",

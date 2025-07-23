@@ -6,6 +6,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,6 +47,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tubebuddy.ui.components.BuddyCard
+import com.example.tubebuddy.ui.components.EntryType
+import com.example.tubebuddy.ui.components.EntryUnits
+import com.example.tubebuddy.ui.components.MedType
+import com.example.tubebuddy.ui.components.MedicationEntry
+import com.example.tubebuddy.ui.components._entryLog
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -65,6 +74,11 @@ fun MedicationScreen() {
 
     //Time Variables
     var selectedTime: LocalTime? by remember { mutableStateOf(null) }
+    var selectedDate: LocalDate by remember { mutableStateOf(LocalDate.now())}
+    val finalLocalDateTime: LocalDateTime = remember(selectedTime, selectedDate) {
+        val timeToUse = selectedTime ?: LocalTime.of(0, 0) // midnite default if time not selected
+        selectedDate.atTime(timeToUse)
+    }
     var showTimePicker by remember { mutableStateOf(false) }
     val formattedTime = remember(selectedTime) {
         selectedTime?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "Select Time"
@@ -88,15 +102,14 @@ fun MedicationScreen() {
         ) {
             Column(
                 modifier = Modifier
-                    .height(280.dp)
                     .fillMaxWidth()
-                    .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
+                    .fillMaxHeight(.4f)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
             ) {
                 Text(
                     text = "Medication Today:",
                     fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(top = 4.dp)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 val scrollState = rememberScrollState()
                 Column(
@@ -121,7 +134,7 @@ fun MedicationScreen() {
                     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(8.dp),
+                        .padding(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
                     )
@@ -140,7 +153,7 @@ fun MedicationScreen() {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 4.dp, start = 16.dp, end = 16.dp)
+                            .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                     ) {
                         ExposedDropdownMenuBox(
                             expanded = expanded,
@@ -298,7 +311,7 @@ fun MedicationScreen() {
                         )
                     }
 
-                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(1f))
 
                     /////////// Submit Button ///////////
                     Column(
@@ -314,6 +327,18 @@ fun MedicationScreen() {
                                     errorDialog = true
                                 }
                                 else {
+                                    _entryLog.add(MedicationEntry(
+                                        _type = EntryType.MEDICINE,
+                                        _complete = true,
+                                        _repeats = false,
+                                        _title = selectedText,
+                                        _time = finalLocalDateTime,
+                                        _amount = doseInput.toDouble(),
+                                        _unit = EntryUnits.mL,
+                                        _notes = noteInput,
+                                        _medType = MedType.ORAL,
+                                        _medicationName = selectedText
+                                    ))
                                     showDialog = true
                                 }
                             },
@@ -341,7 +366,7 @@ fun MedicationScreen() {
                 textAlign = TextAlign.Center) },
             titleContentColor = MaterialTheme.colorScheme.onBackground,
             text = { Text(
-                text = "This entry can be found in the\nFeeding Log Tab.",
+                text = "This entry can be found in the\nLog page.",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center) },
             textContentColor = MaterialTheme.colorScheme.onBackground,

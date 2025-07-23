@@ -1,6 +1,10 @@
 package com.example.tubebuddy.ui.components
+
 import androidx.compose.runtime.mutableStateListOf
+import com.example.tubebuddy.screens.CompletedTaskItemData
+import com.example.tubebuddy.screens.TaskItemData
 import java.time.LocalDateTime
+
 
 enum class EntryType{
     FEED, FLUSH, MEDICINE
@@ -66,3 +70,29 @@ data class MedicationEntry(
 
 val _schedule = mutableStateListOf<Entry>()
 val _entryLog = mutableStateListOf<Entry>()
+
+
+//// Site Care Data ////
+data class TaskItemData(
+    val id: Long, // unique id
+    val text: String,
+    val isChecked: Boolean = false // state
+)
+
+data class CompletedTaskItemData(
+    val id: Long,
+    val dateTime: String,
+    val title: String,
+    val description: String
+)
+
+val tasks =
+    mutableStateListOf(
+        TaskItemData(1, "Clean Tube Site", false),
+        TaskItemData(2, "Redness/Granulation Check", false),
+        TaskItemData(3, "Apply Barrier Cream", false),
+        TaskItemData(4, "Change Dressing", false)
+    )
+
+val completedTasks = mutableStateListOf<CompletedTaskItemData>()
+//// END Site Care Data ////
