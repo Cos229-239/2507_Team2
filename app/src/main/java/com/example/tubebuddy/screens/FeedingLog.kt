@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -30,7 +29,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
@@ -65,16 +64,40 @@ import com.example.tubebuddy.ui.components.FlushEntry
 import com.example.tubebuddy.ui.components.MedType
 import com.example.tubebuddy.ui.components.MedicationEntry
 import com.example.tubebuddy.ui.components._entryLog
-import com.example.tubebuddy.ui.components._schedule
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
 
+enum class MonthList{
+    Jan, Feb, Mar, April, May, June, July, Aug, Sep, Oct, Nov, Dec
+}
+
 //Schedule Detail Sheet
 @Composable
 fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
+    var timeString by remember { mutableStateOf("") }
+    var minuteString by remember { mutableStateOf("") }
 
+    if (entry._time.minute < 10){
+        minuteString = '0' + entry._time.minute.toString()
+    }
+    else{
+        minuteString = entry._time.minute.toString()
+    }
+
+    if (entry._time.hour == 0){
+        timeString = "12:" + minuteString + " AM"
+    }
+    else if (entry._time.hour > 12){
+        timeString = (entry._time.hour-12).toString() + ":" + minuteString + " PM"
+    }
+    else if (entry._time.hour == 12){
+        timeString = "12:" + minuteString + " PM"
+    }
+    else{
+        timeString = entry._time.hour.toString() + ":" + minuteString + " AM"
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -84,16 +107,40 @@ fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Title: ${entry._title}", color = Color.Black)
+
+            Card (modifier = Modifier
+                .size(100.dp, 80.dp), colors = CardDefaults.cardColors(containerColor = Color(31,46,68)), elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)){
+                Column (
+                    modifier = Modifier
+                        .fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(text = entry._time.monthValue.toString() + '/' + entry._time.dayOfMonth,
+                        fontSize = 25.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold)
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(text = timeString,
+                        fontSize = 18.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text("Title: ${entry._title}", color = Color.Black, fontWeight = FontWeight.Medium)
             Text("Type: ${entry._type}", color = Color.Black)
-            Text("Time: ${entry._time}", color = Color.Black)
             Text("Amount: ${entry._amount} ${entry._unit}", color = Color.Black)
             Text("Notes: ${entry._notes}", color = Color.Black)
 
             if (entry is MedicationEntry) {
-                Text("Medication: ${entry._medicationName}", color = Color.Black)
-                Text("Med Type: ${entry._medType}", color = Color.Black)
+                Text("Medication: (" + "${entry._medType}" + ") ${entry._medicationName}", color = Color.Black)
+                //Text("Med Type: ${entry._medType}", color = Color.Black)
             }
+
+            Spacer(modifier = Modifier.height(10.dp))
 
         }
 
@@ -114,6 +161,7 @@ fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -138,6 +186,12 @@ fun FeedingLogScreen() {
     var medDDExpanded by remember { mutableStateOf(false) }
     val medicationOptions = listOf("Advil","Tylenol","Aspirin")
     var selectedMedication by remember { mutableStateOf("") }
+
+    //Date Entry
+    var selectedMonth by remember { mutableStateOf(MonthList.entries[LocalDate.now().monthValue - 1]) }
+    var dayString by remember { mutableStateOf(LocalDate.now().dayOfMonth.toString()) }
+    var yearString by remember { mutableStateOf(LocalDate.now().year.toString()) }
+    var monthDDExpanded by remember { mutableStateOf(false) }
 
     //Other New Entry Sheet Fields
     val currentTime = Calendar.getInstance()
@@ -292,7 +346,7 @@ fun FeedingLogScreen() {
                                 onValueChange = {},
                                 label = {Text("Select a Medication")},
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = medDDExpanded)},
-                                modifier = Modifier.menuAnchor(),
+                                modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true),
                                 colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray)
                             )
                             ExposedDropdownMenu(
@@ -347,6 +401,73 @@ fun FeedingLogScreen() {
                         label = { Text("Enter Title") },
                         colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray)
                     )
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    //-----------Date Selector
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(.75f)
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        //-----------Month Dropdown
+                        Box(modifier = Modifier.weight(1f)) {
+                            ExposedDropdownMenuBox(
+                                expanded = monthDDExpanded,
+                                onExpandedChange = { monthDDExpanded = !monthDDExpanded }
+                            ) {
+                                OutlinedTextField(
+                                    readOnly = true,
+                                    value = selectedMonth.name,
+                                    onValueChange = {},
+                                    label = { Text("Month") },
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = monthDDExpanded)
+                                    },
+                                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true)
+                                    ,
+                                    colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray)
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = monthDDExpanded,
+                                    onDismissRequest = { monthDDExpanded = false }
+                                ) {
+                                    MonthList.entries.forEach { month ->
+                                        DropdownMenuItem(
+                                            text = { Text(month.name, color = Color.Black) },
+                                            onClick = {
+                                                selectedMonth = month
+                                                monthDDExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Day TextField
+                        OutlinedTextField(
+                            value = dayString,
+                            onValueChange = { if (it.length <= 2) dayString = it },
+                            label = { Text("Day") },
+                            modifier = Modifier.weight(0.6f),
+                            colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray)
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Year TextField
+                        OutlinedTextField(
+                            value = yearString,
+                            onValueChange = { if (it.length <= 4) yearString = it },
+                            label = { Text("Year") },
+                            modifier = Modifier.weight(.75f),
+                            colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(20.dp))
 
                     //-----------Time Selector
@@ -412,9 +533,9 @@ fun FeedingLogScreen() {
                                             repeatSwitchOn,
                                             newLogName,
                                             LocalDateTime.of(
-                                                LocalDate.now().year,
-                                                LocalDate.now().month,
-                                                LocalDate.now().dayOfMonth,
+                                                yearString.toInt(),
+                                                (selectedMonth.ordinal + 1),
+                                                dayString.toInt(),
                                                 timePickerState.hour,
                                                 timePickerState.minute
                                             ),
@@ -432,9 +553,9 @@ fun FeedingLogScreen() {
                                             repeatSwitchOn,
                                             newLogName,
                                             LocalDateTime.of(
-                                                LocalDate.now().year,
-                                                LocalDate.now().month,
-                                                LocalDate.now().dayOfMonth,
+                                                yearString.toInt(),
+                                                (selectedMonth.ordinal + 1),
+                                                dayString.toInt(),
                                                 timePickerState.hour,
                                                 timePickerState.minute
                                             ),
@@ -452,9 +573,9 @@ fun FeedingLogScreen() {
                                             repeatSwitchOn,
                                             newLogName,
                                             LocalDateTime.of(
-                                                LocalDate.now().year,
-                                                LocalDate.now().month,
-                                                LocalDate.now().dayOfMonth,
+                                                yearString.toInt(),
+                                                (selectedMonth.ordinal + 1),
+                                                dayString.toInt(),
                                                 timePickerState.hour,
                                                 timePickerState.minute
                                             ),
