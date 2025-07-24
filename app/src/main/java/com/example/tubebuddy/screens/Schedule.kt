@@ -684,9 +684,9 @@ fun insertScheduleEntry(entry: Entry){
 fun scheduleFormatShortTime(dateTime: LocalDateTime): String {
     val minute = dateTime.minute.toString().padStart(2, '0')
     return when {
-        dateTime.hour == 0 -> "12A"
-        dateTime.hour == 12 -> "12P"
-        dateTime.hour > 12 -> "${dateTime.hour - 12}P"
-        else -> "${dateTime.hour}A"
+        dateTime.hour == 0 -> "12a"
+        dateTime.hour == 12 -> "12p"
+        dateTime.hour > 12 -> "${dateTime.hour - 12}p"
+        else -> "${dateTime.hour}a"
     }
 }

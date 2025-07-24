@@ -107,9 +107,7 @@ fun HomeScreen() {
                         ) {
                             items(_schedule) { entry->
                                 ScheduleBuddyCard(
-                                    entry._time.hour.toString(),
-                                    entry._title,
-                                    entry._type.toString(),
+                                    entry,
                                     modifier = Modifier
                                         .size(width = 380.dp, height = 84.dp)
                                         .padding(bottom = 8.dp))
@@ -186,11 +184,8 @@ fun HomeScreen() {
                                 .fillMaxSize()
                         ) {
                             items(_entryLog) { entry->
-                                ScheduleBuddyCard(
-                                    entry._time.hour.toString(),
-                                    entry._title,
-                                    entry._type.toString(),
-                                    modifier = Modifier
+                                LogBuddyCard(
+                                    entry, modifier = Modifier
                                         .size(width = 380.dp, height = 84.dp)
                                         .padding(bottom = 8.dp))
                             }
