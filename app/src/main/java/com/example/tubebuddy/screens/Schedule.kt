@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -43,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,7 +58,6 @@ import com.example.tubebuddy.ui.components.MedType
 import com.example.tubebuddy.ui.components.MedicationEntry
 import com.example.tubebuddy.ui.components._schedule
 import com.example.tubebuddy.ui.components.Entry
-import com.example.tubebuddy.ui.components._entryLog
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -95,10 +95,11 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.45f)
+            .fillMaxHeight(.5f)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+                .padding(bottom = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -199,7 +200,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)), shape = RoundedCornerShape(8.dp)) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = "Delete"
+                    contentDescription = "Delete",
                 )
             }
         }
@@ -310,9 +311,13 @@ fun ScheduleScreen() {
                 sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ) {
                 // Sheet content
+                val scrollState = rememberScrollState()
+
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
+                        .padding(bottom = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
 
                 ) {

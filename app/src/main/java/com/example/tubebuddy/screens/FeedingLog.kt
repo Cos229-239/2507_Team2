@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -272,9 +274,14 @@ fun FeedingLogScreen() {
                 sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ) {
                 // Sheet content
+
+                val scrollState = rememberScrollState()
+
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
+                        .padding(bottom = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
 
                 ) {
@@ -405,7 +412,7 @@ fun FeedingLogScreen() {
                     //-----------Date Selector
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth(.75f)
+                            .fillMaxWidth(.85f)
                             .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
