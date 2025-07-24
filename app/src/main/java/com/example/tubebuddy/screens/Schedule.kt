@@ -1,6 +1,5 @@
 package com.example.tubebuddy.screens
 
-import android.graphics.Paint.Align
 import android.icu.util.Calendar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -24,6 +23,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
@@ -57,7 +57,6 @@ import com.example.tubebuddy.ui.components.MedType
 import com.example.tubebuddy.ui.components.MedicationEntry
 import com.example.tubebuddy.ui.components._schedule
 import com.example.tubebuddy.ui.components.Entry
-import com.example.tubebuddy.ui.components._entryLog
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -167,13 +166,13 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             Button(
                 onClick = {
                     if (entry is FeedEntry || entry is FlushEntry)
-                        _entryLog.add(FeedEntry(entry._type, _complete = true, _repeats = false, entry._title, entry._time, actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes))
+                        insertEntry(FeedEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes))
                     if (entry is MedicationEntry)
-                        _entryLog.add(MedicationEntry(entry._type, _complete = true, _repeats = false, entry._title, entry._time, medActualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._medType, entry._medicationName))
+                        insertEntry(MedicationEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), medActualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._medType, entry._medicationName))
 
                     onDismiss()
                 },
-                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                colors = ButtonDefaults.buttonColors(
                     containerColor = Color(81,130,66),
                     contentColor = Color.White,
                 ), modifier = Modifier.weight(0.75f)
@@ -190,7 +189,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
             Button(
                 onClick = onDelete,
-                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                colors = ButtonDefaults.buttonColors(
                     containerColor = Color(186,26,26),
                     contentColor = Color.White,
             ), modifier = Modifier.weight(0.25f)
@@ -211,7 +210,8 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 @Composable
 fun ScheduleScreen() {
 
-    val context = LocalContext.current
+    //context for toast
+    //val context = LocalContext.current
 
     //sheet
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -292,7 +292,7 @@ fun ScheduleScreen() {
                 EntryDetailSheet(tappedCard!!,
                     onDelete = {
                         _schedule.remove(tappedCard)
-                        tappedCard = null;
+                        tappedCard = null
                     },
                     onDismiss = {
                         tappedCard = null
@@ -382,7 +382,7 @@ fun ScheduleScreen() {
                                 onValueChange = {},
                                 label = {Text("Select a Medication")},
                                 trailingIcon = {ExposedDropdownMenuDefaults.TrailingIcon(expanded = medDDExpanded)},
-                                modifier = Modifier.menuAnchor(),
+                                modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true),
                                 colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray)
                             )
                             ExposedDropdownMenu(
@@ -394,8 +394,8 @@ fun ScheduleScreen() {
                                     DropdownMenuItem(
                                         text = {Text(options, color = Color.Black)},
                                         onClick = {
-                                            selectedMedication = options;
-                                            medDDExpanded = false;
+                                            selectedMedication = options
+                                            medDDExpanded = false
                                         }
                                     )
                                 }
@@ -563,7 +563,7 @@ fun ScheduleScreen() {
                                 }
 
                             },
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(81, 130, 66),
                                 contentColor = Color.White,
                             ),
@@ -589,7 +589,7 @@ fun ScheduleScreen() {
                                     }
                                 }
                             },
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(186, 26, 26),
                                 contentColor = Color.White,
                             ),

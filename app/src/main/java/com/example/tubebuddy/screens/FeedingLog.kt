@@ -29,6 +29,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -223,10 +224,8 @@ fun FeedingLogScreen() {
             ) {
                 //displays each entry in log
                 items(_entryLog) { entry ->
-                    ScheduleBuddyCard(
-                        entry._time.hour.toString(),
-                        entry._title,
-                        entry._type.toString(),
+                    LogBuddyCard(
+                        entry,
                         modifier = Modifier
                             .size(width = 380.dp, height = 94.dp)
                             .padding(bottom = 18.dp)
@@ -256,7 +255,7 @@ fun FeedingLogScreen() {
                     logTappedCard!!,
                     onDelete = {
                         _entryLog.remove(logTappedCard)
-                        logTappedCard = null;
+                        logTappedCard = null
                     },
                     onDismiss = {
                         logTappedCard = null
@@ -358,8 +357,8 @@ fun FeedingLogScreen() {
                                     DropdownMenuItem(
                                         text = {Text(options, color = Color.Black)},
                                         onClick = {
-                                            selectedMedication = options;
-                                            medDDExpanded = false;
+                                            selectedMedication = options
+                                            medDDExpanded = false
                                         }
                                     )
                                 }
@@ -526,7 +525,7 @@ fun FeedingLogScreen() {
                                         FeedType.ORAL
                                     }
 
-                                    _entryLog.add(
+                                    insertEntry(
                                         FeedEntry(
                                             EntryType.FEED,
                                             false,
@@ -546,7 +545,7 @@ fun FeedingLogScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 1) {
                                     //flush
-                                    _entryLog.add(
+                                    insertEntry(
                                         FlushEntry(
                                             EntryType.FLUSH,
                                             false,
@@ -566,7 +565,7 @@ fun FeedingLogScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 2) {
                                     //medication
-                                    _entryLog.add(
+                                    insertEntry(
                                         MedicationEntry(
                                             EntryType.MEDICINE,
                                             false,
@@ -640,5 +639,86 @@ fun FeedingLogScreen() {
             }
         }
         //--------------------End New Item Sheet--------------------
+    }
+}
+
+fun insertEntry(entry: Entry){
+    //find index to insert
+    val insertIndex = _entryLog.indexOfFirst { it._time.isAfter(entry._time) }
+
+    if (insertIndex < 0){
+        _entryLog.add(entry)
+    }
+    else{
+        _entryLog.add(insertIndex, entry)
+    }
+}
+
+//Generate Log Buddy Cards
+@Composable
+fun LogBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
+
+    Card(
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Card(
+                modifier = Modifier
+                    .size(width = 64.dp, height = 56.dp)
+                    .padding(start = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.onBackground
+                )
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+
+                ) {
+
+                    Text(
+                        text = logFormatDate(entry._time),
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                    )
+                }
+            }
+            Column {
+                Text(
+                    text = entry._title,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+                Text(
+                    text = logFormatTime(entry._time) + " • " + entry._type.toString(),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+fun logFormatDate(dateTime: LocalDateTime): String {
+    return (dateTime.monthValue.toString() + '/' + dateTime.dayOfMonth.toString())
+}
+
+fun logFormatTime(dateTime: LocalDateTime): String {
+    val minute = dateTime.minute.toString().padStart(2, '0')
+    return when {
+        dateTime.hour == 0 -> "12:$minute AM"
+        dateTime.hour == 12 -> "12:$minute PM"
+        dateTime.hour > 12 -> "${dateTime.hour - 12}:$minute PM"
+        else -> "${dateTime.hour}:$minute AM"
     }
 }
