@@ -57,6 +57,7 @@ import com.example.tubebuddy.ui.components.MedType
 import com.example.tubebuddy.ui.components.MedicationEntry
 import com.example.tubebuddy.ui.components._schedule
 import com.example.tubebuddy.ui.components.Entry
+import com.example.tubebuddy.ui.components._entryLog
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -265,7 +266,7 @@ fun ScheduleScreen() {
             ) {
                 //displays each entry in log
                 items(_schedule) {
-                    entry->ScheduleBuddyCard(entry._time.hour.toString(), entry._title, entry._type.toString(), modifier = Modifier
+                    entry->ScheduleBuddyCard(entry, modifier = Modifier
                     .size(width = 380.dp, height = 94.dp)
                     .padding(bottom = 18.dp)
                     .clickable { tappedCard = entry })
@@ -494,7 +495,7 @@ fun ScheduleScreen() {
                                         FeedType.ORAL
                                     }
 
-                                    _schedule.add(
+                                    insertScheduleEntry(
                                         FeedEntry(
                                             EntryType.FEED,
                                             false,
@@ -514,7 +515,7 @@ fun ScheduleScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 1) {
                                     //flush
-                                    _schedule.add(
+                                    insertScheduleEntry(
                                         FlushEntry(
                                             EntryType.FLUSH,
                                             false,
@@ -534,7 +535,7 @@ fun ScheduleScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 2) {
                                     //medication
-                                    _schedule.add(
+                                    insertScheduleEntry(
                                         MedicationEntry(
                                             EntryType.MEDICINE,
                                             false,
@@ -615,23 +616,7 @@ fun ScheduleScreen() {
 
 //Generate Schedule Buddy Cards
 @Composable
-fun ScheduleBuddyCard(dateTime: String, title: String, description: String, modifier: Modifier = Modifier) {
-
-    var displayTime by remember { mutableStateOf(dateTime.toInt()) }
-    var displayTimeString by remember { mutableStateOf("") }
-
-    if (displayTime > 12){
-        displayTimeString = (displayTime-12).toString() + 'p'
-    }
-    else if (displayTime==12){
-        displayTimeString = displayTime.toString() + 'p'
-    }
-    else if (displayTime==0){
-        displayTimeString = "12a"
-    }
-    else{
-        displayTimeString = displayTime.toString() + 'a'
-    }
+fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
 
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -660,7 +645,7 @@ fun ScheduleBuddyCard(dateTime: String, title: String, description: String, modi
                 ) {
 
                     Text(
-                        text = displayTimeString,
+                        text = scheduleFormatShortTime(entry._time),
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSecondary,
                     )
@@ -668,18 +653,40 @@ fun ScheduleBuddyCard(dateTime: String, title: String, description: String, modi
             }
             Column {
                 Text(
-                    text = title,
+                    text = entry._title,
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(start = 8.dp)
                 )
                 Text(
-                    text = description,
+                    text = entry._type.toString(),
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
         }
+    }
+}
+
+fun insertScheduleEntry(entry: Entry){
+    //find index to insert
+    val insertIndex = _schedule.indexOfFirst { it._time.isAfter(entry._time) }
+
+    if (insertIndex < 0){
+        _schedule.add(entry)
+    }
+    else{
+        _schedule.add(insertIndex, entry)
+    }
+}
+
+fun scheduleFormatShortTime(dateTime: LocalDateTime): String {
+    val minute = dateTime.minute.toString().padStart(2, '0')
+    return when {
+        dateTime.hour == 0 -> "12A"
+        dateTime.hour == 12 -> "12P"
+        dateTime.hour > 12 -> "${dateTime.hour - 12}P"
+        else -> "${dateTime.hour}A"
     }
 }
