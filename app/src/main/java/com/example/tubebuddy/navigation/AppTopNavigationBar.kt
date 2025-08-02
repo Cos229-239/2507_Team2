@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopNavBar(navController : NavHostController) {
+    var titleColor = MaterialTheme.colorScheme.onSurface
     // Get current back stack entry // Set as current route
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -35,6 +36,10 @@ fun AppTopNavBar(navController : NavHostController) {
         Screen.SiteCare.route -> Screen.SiteCare
         // Future screens get added here
         else -> null // Could set up a default unknown screen here
+    }
+
+    if(currentRoute == Screen.FeedingLog.route) {
+        titleColor = MaterialTheme.colorScheme.tertiary
     }
 
     CenterAlignedTopAppBar(
@@ -57,8 +62,8 @@ fun AppTopNavBar(navController : NavHostController) {
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface
+            titleContentColor = titleColor,
         ),
-        modifier = Modifier.clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)),
+        modifier = Modifier.clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)),
     )
 }

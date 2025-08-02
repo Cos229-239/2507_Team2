@@ -34,15 +34,15 @@ fun AppBottomNavBar(navController: NavHostController) {
             .height(112.dp)
             .clip(
                 RoundedCornerShape(
-                    32.dp,
-                    32.dp
+                    16.dp,
+                    16.dp
                 )
             )
             .background(
                 color = MaterialTheme.colorScheme.tertiary,
                 shape = RoundedCornerShape(
-                    topStart = 36.dp,
-                    topEnd = 36.dp
+                    topStart = 16.dp,
+                    topEnd = 16.dp
                 )
             )
     ) {
@@ -64,8 +64,8 @@ fun RowScope.AddItem(
 ) {
     NavigationBarItem(
         colors = NavigationBarItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.onBackground,
-            selectedTextColor = MaterialTheme.colorScheme.onBackground,
+            selectedIconColor = MaterialTheme.colorScheme.tertiary,
+            selectedTextColor = MaterialTheme.colorScheme.tertiary,
             unselectedIconColor = MaterialTheme.colorScheme.onSurface,
             unselectedTextColor = MaterialTheme.colorScheme.onSurface,
             indicatorColor = Color.Transparent

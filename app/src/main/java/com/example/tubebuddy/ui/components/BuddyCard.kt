@@ -38,7 +38,7 @@ fun BuddyCard(dateTime: String, title: String, description: String) {
                     .size(width = 64.dp, height = 56.dp)
                     .padding(start = 8.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Column(
@@ -50,7 +50,7 @@ fun BuddyCard(dateTime: String, title: String, description: String) {
                     Text(
                         text = dateTime,
                         fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
             }
@@ -58,13 +58,13 @@ fun BuddyCard(dateTime: String, title: String, description: String) {
                 Text(
                     text = title,
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.padding(start = 8.dp)
                 )
                 Text(
                     text = description,
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSecondary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }

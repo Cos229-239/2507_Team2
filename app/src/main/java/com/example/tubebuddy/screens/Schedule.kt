@@ -32,10 +32,15 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderColors
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePickerColors
+import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -58,6 +63,7 @@ import com.example.tubebuddy.ui.components.MedType
 import com.example.tubebuddy.ui.components.MedicationEntry
 import com.example.tubebuddy.ui.components._schedule
 import com.example.tubebuddy.ui.components.Entry
+import com.example.tubebuddy.ui.theme.Gray100
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -125,13 +131,13 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Text("Title: ${entry._title}", color = Color.Black, fontWeight = FontWeight.Medium)
-            Text("Type: ${entry._type}", color = Color.Black)
-            Text("Amount: ${entry._amount} ${entry._unit}", color = Color.Black)
-            Text("Notes: ${entry._notes}", color = Color.Black)
+            Text("Title: ${entry._title}", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
+            Text("Type: ${entry._type}", color = MaterialTheme.colorScheme.onSurface)
+            Text("Amount: ${entry._amount} ${entry._unit}", color =MaterialTheme.colorScheme.onSurface)
+            Text("Notes: ${entry._notes}", color = MaterialTheme.colorScheme.onSurface)
 
             if (entry is MedicationEntry) {
-                Text("Medication: (" + "${entry._medType}" + ") ${entry._medicationName}", color = Color.Black)
+                Text("Medication: (" + "${entry._medType}" + ") ${entry._medicationName}", color = MaterialTheme.colorScheme.onSurface)
                 //Text("Med Type: ${entry._medType}", color = Color.Black)
             }
 
@@ -143,9 +149,16 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                     value = medActualAmountSliderValue.value,
                     onValueChange = { medActualAmountSliderValue.value = it },
                     valueRange = 0f..10f,
-                    steps = 9
+                    steps = 9,
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.tertiary,
+                        activeTrackColor = MaterialTheme.colorScheme.tertiary,
+                        activeTickColor = MaterialTheme.colorScheme.tertiary,
+                        inactiveTrackColor = MaterialTheme.colorScheme.onTertiary,
+                        inactiveTickColor = MaterialTheme.colorScheme.tertiary,
+                    )
                 )
-                Text(text = medActualAmountSliderValue.value.roundToInt().toString() + " mg", color = Color.Black)
+                Text(text = medActualAmountSliderValue.value.roundToInt().toString() + " mg", color = MaterialTheme.colorScheme.onSurface)
             }
             else{
 
@@ -153,9 +166,16 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                     value = actualAmountSliderValue.value,
                     onValueChange = { actualAmountSliderValue.value = it },
                     valueRange = 0f..100f,
-                    steps = 99
+                    steps = 99,
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.tertiary,
+                        activeTrackColor = MaterialTheme.colorScheme.tertiary,
+                        activeTickColor = MaterialTheme.colorScheme.tertiary,
+                        inactiveTrackColor = MaterialTheme.colorScheme.onTertiary,
+                        inactiveTickColor = MaterialTheme.colorScheme.tertiary,
+                    )
                 )
-                Text(text = actualAmountSliderValue.value.roundToInt().toString() + " mL", color = Color.Black)
+                Text(text = actualAmountSliderValue.value.roundToInt().toString() + " mL", color = MaterialTheme.colorScheme.onSurface)
             }
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -257,7 +277,7 @@ fun ScheduleScreen() {
     ) {
         //if log is empty display basic text
         if (!(_schedule.size >= 1))
-            Text(text = "No Scheduled Items", fontSize = 30.sp, color = Color.Black)
+            Text(text = "No Scheduled Items", fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground)
         else{
             LazyColumn(
                 modifier = Modifier
@@ -281,6 +301,8 @@ fun ScheduleScreen() {
                 .align(Alignment.BottomEnd)
                 .padding(24.dp),
             onClick = { showBottomSheet = true },
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.tertiary
         ) {
             Text(text = "+", fontSize = 24.sp)
         }
@@ -289,7 +311,8 @@ fun ScheduleScreen() {
         if (tappedCard!=null){
             ModalBottomSheet(
                 onDismissRequest = { tappedCard = null },
-                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
+                containerColor = MaterialTheme.colorScheme.secondary
             ) {
                 EntryDetailSheet(tappedCard!!,
                     onDelete = {
@@ -308,7 +331,8 @@ fun ScheduleScreen() {
                 onDismissRequest = {
                     showBottomSheet = false
                 },
-                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                containerColor = MaterialTheme.colorScheme.secondary
             ) {
                 // Sheet content
                 val scrollState = rememberScrollState()
@@ -327,9 +351,9 @@ fun ScheduleScreen() {
                         text = "New Schedule Entry",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSecondary,
                     )
-                    Spacer(modifier = Modifier.height(15.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     //-----------Entry Category Segmented Button
                     SingleChoiceSegmentedButtonRow(
@@ -345,11 +369,15 @@ fun ScheduleScreen() {
                                 ),
                                 onClick = { newItemCategoriesSelectedIndex = index },
                                 selected = index == newItemCategoriesSelectedIndex,
-                                label = { Text(label) }
+                                label = { Text(label) },
+                                colors = SegmentedButtonDefaults.colors(
+                                    activeContainerColor = MaterialTheme.colorScheme.tertiary,
+                                    activeContentColor = MaterialTheme.colorScheme.onTertiary
+                                )
                             )
                         }
                     }
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
 
                     //-----------Feed Type Segmented Button
@@ -367,7 +395,11 @@ fun ScheduleScreen() {
                                     ),
                                     onClick = { newFeedSelectedIndex = index },
                                     selected = index == newFeedSelectedIndex,
-                                    label = { Text(label) }
+                                    label = { Text(label) },
+                                    colors = SegmentedButtonDefaults.colors(
+                                        activeContainerColor = MaterialTheme.colorScheme.tertiary,
+                                        activeContentColor = MaterialTheme.colorScheme.onTertiary
+                                    )
                                 )
                             }
                         }
@@ -389,7 +421,13 @@ fun ScheduleScreen() {
                                 label = {Text("Select a Medication")},
                                 trailingIcon = {ExposedDropdownMenuDefaults.TrailingIcon(expanded = medDDExpanded)},
                                 modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true),
-                                colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray)
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                                    focusedTextColor = MaterialTheme.colorScheme.surface,
+                                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                                    unfocusedTextColor = MaterialTheme.colorScheme.surface,
+                                    unfocusedLabelColor = MaterialTheme.colorScheme.surface)
                             )
                             ExposedDropdownMenu(
                                 expanded = medDDExpanded,
@@ -398,7 +436,7 @@ fun ScheduleScreen() {
                                 medicationOptions.forEach{
                                     options->
                                     DropdownMenuItem(
-                                        text = {Text(options, color = Color.Black)},
+                                        text = {Text(options, color = MaterialTheme.colorScheme.surface)},
                                         onClick = {
                                             selectedMedication = options
                                             medDDExpanded = false
@@ -417,9 +455,16 @@ fun ScheduleScreen() {
                             value = amountSliderValue,
                             onValueChange = { amountSliderValue = it },
                             valueRange = 0f..100f,
-                            steps = 99
+                            steps = 99,
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.tertiary,
+                                activeTrackColor = MaterialTheme.colorScheme.tertiary,
+                                activeTickColor = MaterialTheme.colorScheme.tertiary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.onTertiary,
+                                inactiveTickColor = MaterialTheme.colorScheme.tertiary,
+                            )
                         )
-                        Text(text = amountSliderValue.roundToInt().toString() + " mL", color = Color.Black)
+                        Text(text = amountSliderValue.roundToInt().toString() + " mL", color = MaterialTheme.colorScheme.onSecondary)
                         Spacer(modifier = Modifier.height(10.dp))
                     }
 
@@ -430,9 +475,19 @@ fun ScheduleScreen() {
                             value = medAmountSliderValue,
                             onValueChange = { medAmountSliderValue = it },
                             valueRange = 0f..10f,
-                            steps = 9
+                            steps = 9,
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.tertiary,
+                                activeTrackColor = MaterialTheme.colorScheme.tertiary,
+                                activeTickColor = MaterialTheme.colorScheme.tertiary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.onTertiary,
+                                inactiveTickColor = MaterialTheme.colorScheme.tertiary,
+                            )
                         )
-                        Text(text = medAmountSliderValue.roundToInt().toString() + " mg", color = Color.Black)
+                        Text(
+                            text = medAmountSliderValue.roundToInt().toString() + " mg",
+                            color = MaterialTheme.colorScheme.onSecondary)
+
                         Spacer(modifier = Modifier.height(10.dp))
                     }
 
@@ -441,13 +496,29 @@ fun ScheduleScreen() {
                         value = newLogName,
                         onValueChange = { newLogName = it },
                         label = { Text("Enter Title") },
-                        colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray)
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                            focusedTextColor = MaterialTheme.colorScheme.surface,
+                            focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.surface,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.surface)
                         )
                     Spacer(modifier = Modifier.height(20.dp))
 
                     //-----------Time Selector
                     TimeInput(
-                        state = timePickerState
+                        state = timePickerState,
+                        colors = TimePickerDefaults.colors(
+                            timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.tertiary,
+                            timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.onSurface,
+                            timeSelectorSelectedContentColor = MaterialTheme.colorScheme.surface,
+                            timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.surface,
+                            periodSelectorSelectedContainerColor = MaterialTheme.colorScheme.tertiary,
+                            periodSelectorUnselectedContainerColor = MaterialTheme.colorScheme.onSurface,
+                            periodSelectorSelectedContentColor = MaterialTheme.colorScheme.surface,
+                            periodSelectorUnselectedContentColor = MaterialTheme.colorScheme.surface,
+                        )
                     )
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -461,11 +532,29 @@ fun ScheduleScreen() {
                         Text(
                             text = "Repeat   ", // Label text
                             fontSize = 16.sp,
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onSecondary
                         )
                         Switch(
                             checked = repeatSwitchOn,
-                            onCheckedChange = { repeatSwitchOn = it }
+                            onCheckedChange = { repeatSwitchOn = it },
+                            colors = SwitchColors(
+                                checkedThumbColor = MaterialTheme.colorScheme.tertiary,
+                                checkedTrackColor = MaterialTheme.colorScheme.surface,
+                                checkedBorderColor = MaterialTheme.colorScheme.tertiary,
+                                checkedIconColor = MaterialTheme.colorScheme.tertiary,
+                                uncheckedThumbColor = MaterialTheme.colorScheme.surface,
+                                uncheckedTrackColor = MaterialTheme.colorScheme. onSurface,
+                                uncheckedBorderColor = MaterialTheme.colorScheme.surface,
+                                uncheckedIconColor = MaterialTheme.colorScheme.surface,
+                                disabledCheckedThumbColor = MaterialTheme.colorScheme.tertiary,
+                                disabledCheckedTrackColor = MaterialTheme.colorScheme.tertiary,
+                                disabledCheckedBorderColor = MaterialTheme.colorScheme.tertiary,
+                                disabledCheckedIconColor = MaterialTheme.colorScheme.tertiary,
+                                disabledUncheckedThumbColor = MaterialTheme.colorScheme.tertiary,
+                                disabledUncheckedTrackColor = MaterialTheme.colorScheme.tertiary,
+                                disabledUncheckedBorderColor = MaterialTheme.colorScheme.tertiary,
+                                disabledUncheckedIconColor =MaterialTheme.colorScheme.tertiary
+                            )
                         )
                     }
                     Spacer(modifier = Modifier.height(10.dp))
@@ -475,7 +564,13 @@ fun ScheduleScreen() {
                         value = newNotes,
                         onValueChange = { newNotes = it },
                         label = { Text("Notes") },
-                        colors = TextFieldDefaults.colors(focusedTextColor = Color.Black, unfocusedTextColor = Color.DarkGray),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                            focusedTextColor = MaterialTheme.colorScheme.surface,
+                            focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.surface,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.surface),
                         modifier = Modifier
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -639,7 +734,7 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     .size(width = 64.dp, height = 56.dp)
                     .padding(start = 8.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Column(
@@ -652,7 +747,7 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     Text(
                         text = scheduleFormatShortTime(entry._time),
                         fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
             }

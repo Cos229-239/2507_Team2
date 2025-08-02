@@ -43,7 +43,7 @@ fun MainScreenContent() {
     // Remember navController
     val navController = rememberNavController()
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.primary,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             AppTopNavBar(navController = navController)
         },

@@ -126,7 +126,6 @@ fun SiteCareScreen() {
         floatingActionButton = {
 
         },
-        containerColor = MaterialTheme.colorScheme.secondary
     ) { paddingValues ->
         Column(
             modifier = Modifier

@@ -55,7 +55,7 @@ fun ScheduleBuddyCard(dateTime: String, title: String, description: String, modi
                     .size(width = 64.dp, height = 56.dp)
                     .padding(start = 8.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = MaterialTheme.colorScheme.secondary
                 )
             ) {
                 Column(

@@ -20,11 +20,11 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,39 +32,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tubebuddy.ui.components.ScheduleBuddyCard
 import com.example.tubebuddy.ui.components._entryLog
 import com.example.tubebuddy.ui.components._schedule
 
 @Composable
 fun HomeScreen() {
-    // scheduleItems and feedingLog values no longer used
-//    val scheduleItems = remember {
-//        mutableStateListOf("Bolus Feed - 8:00 AM", "Flush - 12:00 PM", "Medication - 3:00 PM")
-//    }
-//
-//    val feedingLog = listOf(
-//        "Medication Completed - 8:00 AM",
-//        "Flush Completed - 12:00 PM",
-//        "Bolus Feed Completed - 3:00 PM"
-//    )
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 8.dp, end = 8.dp)
+                .padding(16.dp)
         ) {
 
             // SCHEDULE SECTION
             Card(
                 modifier = Modifier
                     .fillMaxHeight(.5f)
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onSurface)
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
@@ -97,7 +85,7 @@ fun HomeScreen() {
                             Text(
                                 "No Scheduled Items",
                                 fontSize = 24.sp,
-                                color = Color.Black)
+                                color = MaterialTheme.colorScheme.onBackground)
                         }
                     }
                     else {
@@ -115,23 +103,20 @@ fun HomeScreen() {
                             }
                         }
                     }
-//                    scheduleItems.forEach { item ->
-//                        SwipeToDeleteCard(item = item) {
-//                            scheduleItems.remove(it)
-//                        }
-//                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // FEEDING LOG SECTION
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Row(
@@ -143,7 +128,7 @@ fun HomeScreen() {
                             "Log Overview",
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.onBackground)
+                            color = MaterialTheme.colorScheme.tertiary)
 
                         // Inline Inventory Alert
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -151,7 +136,6 @@ fun HomeScreen() {
                                 text = "Inventory Low",
                                 color = Color.Red,
                                 fontSize = 12.sp,
-                                //fontWeight = FontWeight.Bold
                             )
                             Icon(
                                 Icons.Default.Warning,
@@ -175,7 +159,7 @@ fun HomeScreen() {
                             Text(
                                 "No Logged Items",
                                 fontSize = 24.sp,
-                                color = Color.Black)
+                                color = MaterialTheme.colorScheme.tertiary)
                         }
                     }
                     else {
@@ -191,14 +175,6 @@ fun HomeScreen() {
                             }
                         }
                     }
-//                    feedingLog.forEach {
-//                        Text(
-//                            text = "• $it",
-//                            modifier = Modifier.padding(vertical = 4.dp),
-//                            fontSize = 14.sp,
-//                            color = Color.Black
-//                        )
-//                    }
                 }
             }
         }
@@ -208,33 +184,11 @@ fun HomeScreen() {
             onClick = { /* Add schedule item */ },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(24.dp)
+                .padding(24.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.tertiary
         ) {
             Text(text = "+", fontSize = 24.sp)
         }
     }
 }
-
-@Composable
-fun SwipeToDeleteCard(item: String, onDelete: (String) -> Unit) {
-    Card(
-        shape = RoundedCornerShape(10.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(item, color = Color.Black)
-            TextButton(onClick = { onDelete(item) }) {
-                Text("Delete", color = Color.Red)
-            }
-        }
-    }
-}
-
