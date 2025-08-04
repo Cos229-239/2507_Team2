@@ -1,6 +1,7 @@
 package com.example.tubebuddy.screens
 
 import android.icu.util.Calendar
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -771,8 +772,8 @@ fun LogBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     .size(width = 64.dp, height = 56.dp)
                     .padding(start = 8.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
+                    containerColor = MaterialTheme.colorScheme.primary),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onTertiary)
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -784,7 +785,7 @@ fun LogBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     Text(
                         text = logFormatDate(entry._time),
                         fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                 }
             }
@@ -792,13 +793,13 @@ fun LogBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                 Text(
                     text = entry._title,
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier.padding(start = 8.dp)
                 )
                 Text(
                     text = logFormatTime(entry._time) + " • " + entry._type.toString(),
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }

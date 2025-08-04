@@ -127,7 +127,7 @@ fun HomeScreen() {
                             "Log Overview",
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.onPrimary)
+                            color = MaterialTheme.colorScheme.onBackground)
 
                         // Inline Inventory Alert
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -158,7 +158,7 @@ fun HomeScreen() {
                             Text(
                                 "No Logged Items",
                                 fontSize = 24.sp,
-                                color = MaterialTheme.colorScheme.onPrimary)
+                                color = MaterialTheme.colorScheme.onBackground)
                         }
                     }
                     else {

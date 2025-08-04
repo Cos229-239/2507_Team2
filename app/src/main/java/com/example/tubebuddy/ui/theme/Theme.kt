@@ -18,7 +18,7 @@ private val DarkColorScheme = darkColorScheme(
     onSecondary = Gray10,
 
     tertiary = Orange20,
-    onTertiary = Gray80,
+    onTertiary = Gray10,
 
     background = Gray70,
     onBackground = Gray10,
@@ -38,7 +38,7 @@ private val LightColorScheme = lightColorScheme(
     onTertiary = Gray80,
 
     background = Gray50,
-    onBackground = Gray10,
+    onBackground = Gray60,
 
     surface = Gray60,
     onSurface = Gray10

@@ -285,7 +285,7 @@ fun ScheduleScreen() {
     ) {
         //if log is empty display basic text
         if (!(_schedule.size >= 1))
-            Text(text = "No Scheduled Items", fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground)
+            Text(text = "No Scheduled Items", fontSize = 30.sp, color = MaterialTheme.colorScheme.onPrimary)
         else{
             LazyColumn(
                 modifier = Modifier
@@ -755,7 +755,7 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     Text(
                         text = scheduleFormatShortTime(entry._time),
                         fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                 }
             }
@@ -763,7 +763,7 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                 Text(
                     text = entry._title,
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier.padding(start = 8.dp)
                 )
                 Text(
