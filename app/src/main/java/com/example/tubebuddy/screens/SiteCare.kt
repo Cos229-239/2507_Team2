@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -84,8 +85,8 @@ fun CreateTaskItem(
                 uncheckedBoxColor = MaterialTheme.colorScheme.secondary,
                 uncheckedCheckmarkColor = MaterialTheme.colorScheme.background,
                 checkedCheckmarkColor = MaterialTheme.colorScheme.tertiary,
-                checkedBoxColor = MaterialTheme.colorScheme.onBackground,
-                checkedBorderColor = MaterialTheme.colorScheme.onBackground,
+                checkedBoxColor = MaterialTheme.colorScheme.surface,
+                checkedBorderColor = MaterialTheme.colorScheme.surface,
                 disabledBorderColor = MaterialTheme.colorScheme.background,
                 disabledUncheckedBorderColor = MaterialTheme.colorScheme.background,
                 disabledIndeterminateBorderColor = MaterialTheme.colorScheme.background,
@@ -123,9 +124,6 @@ fun SiteCareScreen() {
         contentWindowInsets = WindowInsets(0.dp),
         modifier = Modifier
             .fillMaxSize(),
-        floatingActionButton = {
-
-        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -149,7 +147,7 @@ fun SiteCareScreen() {
                     .fillMaxHeight(.5f)
                     .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.secondary
                 )
             ) {
                 Row {
@@ -188,7 +186,7 @@ fun SiteCareScreen() {
                     ) {
                         SmallFloatingActionButton (
                             onClick = { showAddTaskDialog = true },
-                            containerColor = MaterialTheme.colorScheme.onBackground,
+                            containerColor = MaterialTheme.colorScheme.surface,
                             contentColor = MaterialTheme.colorScheme.tertiary,
                             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 12.dp)
                         ) {
@@ -238,14 +236,15 @@ fun SiteCareScreen() {
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     textStyle = TextStyle(
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.surface
                     ),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
-                        focusedBorderColor = MaterialTheme.colorScheme.tertiary,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                        focusedContainerColor = MaterialTheme.colorScheme.background,
-                    )
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                        focusedTextColor = MaterialTheme.colorScheme.surface,
+                        focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.surface,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.surface)
                 )
             },
             confirmButton = {
@@ -260,10 +259,10 @@ fun SiteCareScreen() {
                     },
                     enabled = newTaskText.isNotBlank(),
                     colors = ButtonDefaults.textButtonColors(
-                        containerColor = MaterialTheme.colorScheme.onBackground,
+                        containerColor = MaterialTheme.colorScheme.surface,
                         contentColor = MaterialTheme.colorScheme.tertiary,
-                        disabledContentColor = MaterialTheme.colorScheme.primary,
-                        disabledContainerColor = MaterialTheme.colorScheme.primary
+                        disabledContentColor = MaterialTheme.colorScheme.secondary,
+                        disabledContainerColor = MaterialTheme.colorScheme.secondary
                     )
                 ) {
                     Text("Add")
@@ -311,14 +310,15 @@ fun SiteCareScreen() {
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         textStyle = TextStyle(
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.surface
                         ),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
-                            focusedBorderColor = MaterialTheme.colorScheme.tertiary,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                            focusedContainerColor = MaterialTheme.colorScheme.background,
-                        )
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                            focusedTextColor = MaterialTheme.colorScheme.surface,
+                            focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.surface,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.surface)
                     )
                 }
             },
@@ -347,8 +347,8 @@ fun SiteCareScreen() {
                         newNote = ""
                     },
                     colors = ButtonDefaults.textButtonColors(
-                        containerColor = MaterialTheme.colorScheme.onBackground,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.tertiary
                     )
                 ) {
                     Text("Log Daily Tasks")

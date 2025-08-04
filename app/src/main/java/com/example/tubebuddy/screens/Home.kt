@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -128,7 +127,7 @@ fun HomeScreen() {
                             "Log Overview",
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.tertiary)
+                            color = MaterialTheme.colorScheme.onPrimary)
 
                         // Inline Inventory Alert
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -159,7 +158,7 @@ fun HomeScreen() {
                             Text(
                                 "No Logged Items",
                                 fontSize = 24.sp,
-                                color = MaterialTheme.colorScheme.tertiary)
+                                color = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
                     else {
