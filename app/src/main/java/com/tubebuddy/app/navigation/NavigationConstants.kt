@@ -1,4 +1,4 @@
-package com.example.tubebuddy.navigation
+package com.tubebuddy.app.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DateRange

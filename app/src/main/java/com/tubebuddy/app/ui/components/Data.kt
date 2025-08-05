@@ -1,8 +1,6 @@
-package com.example.tubebuddy.ui.components
+package com.tubebuddy.app.ui.components
 
 import androidx.compose.runtime.mutableStateListOf
-import com.example.tubebuddy.screens.CompletedTaskItemData
-import com.example.tubebuddy.screens.TaskItemData
 import java.time.LocalDateTime
 
 

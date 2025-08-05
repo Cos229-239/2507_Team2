@@ -1,4 +1,4 @@
-package com.example.tubebuddy
+package com.tubebuddy.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,10 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
-import com.example.tubebuddy.navigation.AppBottomNavBar
-import com.example.tubebuddy.navigation.AppNavHost
-import com.example.tubebuddy.navigation.AppTopNavBar
-import com.example.tubebuddy.ui.theme.TubeBuddyTheme
+import com.tubebuddy.app.navigation.AppBottomNavBar
+import com.tubebuddy.app.navigation.AppNavHost
+import com.tubebuddy.app.navigation.AppTopNavBar
+import com.tubebuddy.app.ui.theme.TubeBuddyTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

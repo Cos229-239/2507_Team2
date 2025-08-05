@@ -1,4 +1,4 @@
-package com.example.tubebuddy.ui.theme
+package com.tubebuddy.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

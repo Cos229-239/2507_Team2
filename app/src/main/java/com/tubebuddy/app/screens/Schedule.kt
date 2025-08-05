@@ -1,4 +1,4 @@
-package com.example.tubebuddy.screens
+package com.tubebuddy.app.screens
 
 import android.icu.util.Calendar
 import androidx.compose.foundation.clickable
@@ -63,15 +63,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tubebuddy.ui.components.Entry
-import com.example.tubebuddy.ui.components.EntryType
-import com.example.tubebuddy.ui.components.EntryUnits
-import com.example.tubebuddy.ui.components.FeedEntry
-import com.example.tubebuddy.ui.components.FeedType
-import com.example.tubebuddy.ui.components.FlushEntry
-import com.example.tubebuddy.ui.components.MedType
-import com.example.tubebuddy.ui.components.MedicationEntry
-import com.example.tubebuddy.ui.components._schedule
+import com.tubebuddy.app.ui.components.Entry
+import com.tubebuddy.app.ui.components.EntryType
+import com.tubebuddy.app.ui.components.EntryUnits
+import com.tubebuddy.app.ui.components.FeedEntry
+import com.tubebuddy.app.ui.components.FeedType
+import com.tubebuddy.app.ui.components.FlushEntry
+import com.tubebuddy.app.ui.components.MedType
+import com.tubebuddy.app.ui.components.MedicationEntry
+import com.tubebuddy.app.ui.components._schedule
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime

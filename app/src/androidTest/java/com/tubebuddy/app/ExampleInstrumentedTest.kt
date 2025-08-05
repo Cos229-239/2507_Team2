@@ -1,4 +1,4 @@
-package com.example.tubebuddy
+package com.tubebuddy.app
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry

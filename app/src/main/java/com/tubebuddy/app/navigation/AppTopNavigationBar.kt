@@ -1,4 +1,4 @@
-package com.example.tubebuddy.navigation
+package com.tubebuddy.app.navigation
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape

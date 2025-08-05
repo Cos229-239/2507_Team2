@@ -1,4 +1,4 @@
-package com.example.tubebuddy.ui.components
+package com.tubebuddy.app.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package com.example.tubebuddy.screens
+package com.tubebuddy.app.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +28,6 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
@@ -46,25 +45,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tubebuddy.ui.components.BuddyCard
-import com.example.tubebuddy.ui.components.completedTasks
-import com.example.tubebuddy.ui.components.tasks
+import com.tubebuddy.app.ui.components.BuddyCard
+import com.tubebuddy.app.ui.components.CompletedTaskItemData
+import com.tubebuddy.app.ui.components.TaskItemData
+import com.tubebuddy.app.ui.components.completedTasks
+import com.tubebuddy.app.ui.components.tasks
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
-
-data class TaskItemData(
-    val id: Long, // unique id
-    val text: String,
-    val isChecked: Boolean = false // state
-)
-
-data class CompletedTaskItemData(
-    val id: Long,
-    val dateTime: String,
-    val title: String,
-    val description: String
-)
 
 @Composable
 fun CreateTaskItem(
@@ -342,7 +329,8 @@ fun SiteCareScreen() {
                             dateTime = formattedDate.toString(),
                             title = "$numberOfTasksComplete out of ${tasks.size} tasks complete",
                             description = "Notes: $newNote"
-                        ))
+                        )
+                        )
                         showCompleteDialog = false
                         newNote = ""
                     },

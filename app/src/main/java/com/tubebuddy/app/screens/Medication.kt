@@ -1,4 +1,4 @@
-package com.example.tubebuddy.screens
+package com.tubebuddy.app.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -46,12 +45,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tubebuddy.ui.components.BuddyCard
-import com.example.tubebuddy.ui.components.EntryType
-import com.example.tubebuddy.ui.components.EntryUnits
-import com.example.tubebuddy.ui.components.MedType
-import com.example.tubebuddy.ui.components.MedicationEntry
-import com.example.tubebuddy.ui.components._entryLog
+import com.tubebuddy.app.ui.components.BuddyCard
+import com.tubebuddy.app.ui.components.EntryType
+import com.tubebuddy.app.ui.components.EntryUnits
+import com.tubebuddy.app.ui.components.MedType
+import com.tubebuddy.app.ui.components.MedicationEntry
+import com.tubebuddy.app.ui.components._entryLog
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime

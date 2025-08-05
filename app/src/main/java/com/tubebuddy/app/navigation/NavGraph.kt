@@ -1,17 +1,17 @@
-package com.example.tubebuddy.navigation
+package com.tubebuddy.app.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.tubebuddy.screens.FeedingLogScreen
-import com.example.tubebuddy.screens.HomeScreen
-import com.example.tubebuddy.screens.MedicationScreen
-import com.example.tubebuddy.screens.ScheduleScreen
-import com.example.tubebuddy.screens.SiteCareScreen
-import com.example.tubebuddy.screens.InventoryScreen
-import com.example.tubebuddy.screens.ProfileScreen
+import com.tubebuddy.app.screens.FeedingLogScreen
+import com.tubebuddy.app.screens.HomeScreen
+import com.tubebuddy.app.screens.MedicationScreen
+import com.tubebuddy.app.screens.ScheduleScreen
+import com.tubebuddy.app.screens.SiteCareScreen
+import com.tubebuddy.app.screens.InventoryScreen
+import com.tubebuddy.app.screens.ProfileScreen
 
 @Composable
 fun AppNavHost(

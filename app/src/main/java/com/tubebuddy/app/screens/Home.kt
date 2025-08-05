@@ -1,4 +1,4 @@
-package com.example.tubebuddy.screens
+package com.tubebuddy.app.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,8 +31,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tubebuddy.ui.components._entryLog
-import com.example.tubebuddy.ui.components._schedule
+import com.tubebuddy.app.ui.components._entryLog
+import com.tubebuddy.app.ui.components._schedule
 
 @Composable
 fun HomeScreen() {

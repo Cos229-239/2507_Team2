@@ -1,4 +1,4 @@
-package com.example.tubebuddy.screens
+package com.tubebuddy.app.screens
 
 import android.icu.util.Calendar
 import androidx.compose.foundation.BorderStroke
@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -63,15 +64,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tubebuddy.ui.components.Entry
-import com.example.tubebuddy.ui.components.EntryType
-import com.example.tubebuddy.ui.components.EntryUnits
-import com.example.tubebuddy.ui.components.FeedEntry
-import com.example.tubebuddy.ui.components.FeedType
-import com.example.tubebuddy.ui.components.FlushEntry
-import com.example.tubebuddy.ui.components.MedType
-import com.example.tubebuddy.ui.components.MedicationEntry
-import com.example.tubebuddy.ui.components._entryLog
+import com.tubebuddy.app.ui.components.Entry
+import com.tubebuddy.app.ui.components.EntryType
+import com.tubebuddy.app.ui.components.EntryUnits
+import com.tubebuddy.app.ui.components.FeedEntry
+import com.tubebuddy.app.ui.components.FeedType
+import com.tubebuddy.app.ui.components.FlushEntry
+import com.tubebuddy.app.ui.components.MedType
+import com.tubebuddy.app.ui.components.MedicationEntry
+import com.tubebuddy.app.ui.components._entryLog
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -154,7 +155,7 @@ fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
         Button(
             onClick = onDelete,
-            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+            colors = ButtonDefaults.buttonColors(
                 containerColor = Color(186,26,26),
                 contentColor = Color.White,
             ), modifier = Modifier
@@ -691,7 +692,7 @@ fun FeedingLogScreen() {
                                     }
                                 }
 
-                            }, colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            }, colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(81, 130, 66),
                                 contentColor = Color.White,
                             ),
@@ -716,7 +717,7 @@ fun FeedingLogScreen() {
                                         showBottomSheet = false
                                     }
                                 }
-                            }, colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            }, colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(186, 26, 26),
                                 contentColor = Color.White,
                             ),

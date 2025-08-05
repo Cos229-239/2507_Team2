@@ -1,4 +1,4 @@
-package com.example.tubebuddy
+package com.tubebuddy.app
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

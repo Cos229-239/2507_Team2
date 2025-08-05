@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.tubebuddy"
+    namespace = "com.tubebuddy.app"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.tubebuddy"
+        applicationId = "com.tubebuddy.app"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
