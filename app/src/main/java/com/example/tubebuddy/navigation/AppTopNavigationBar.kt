@@ -1,15 +1,16 @@
 package com.example.tubebuddy.navigation
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,6 +34,8 @@ fun AppTopNavBar(navController : NavHostController) {
         Screen.Schedule.route -> Screen.Schedule
         Screen.Medication.route -> Screen.Medication
         Screen.SiteCare.route -> Screen.SiteCare
+        Screen.Inventory.route -> Screen.Inventory
+        Screen.Profile.route -> Screen.Profile
         // Future screens get added here
         else -> null // Could set up a default unknown screen here
     }
@@ -53,6 +56,22 @@ fun AppTopNavBar(navController : NavHostController) {
             }
             // add burger here later
             // else if current == home.route = showDrawer
+        },
+        actions = {
+            IconButton(onClick = {
+                navController.navigate(Screen.Profile.route) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                }
+            } ) {
+                Icon(
+                    imageVector = Icons.Filled.AccountCircle,
+                    contentDescription = "Profile",
+                    Modifier.size(36.dp)
+                )
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,

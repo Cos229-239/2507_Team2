@@ -10,7 +10,8 @@ import com.example.tubebuddy.screens.HomeScreen
 import com.example.tubebuddy.screens.MedicationScreen
 import com.example.tubebuddy.screens.ScheduleScreen
 import com.example.tubebuddy.screens.SiteCareScreen
-
+import com.example.tubebuddy.screens.InventoryScreen
+import com.example.tubebuddy.screens.ProfileScreen
 
 @Composable
 fun AppNavHost(
@@ -31,11 +32,17 @@ fun AppNavHost(
             composable(Screen.FeedingLog.route) {
                 FeedingLogScreen()
             }
-            composable(Screen.Medication.route) {
+            composable(Screen.Medication.route) { //NEEDS TO BE REMOVED
                 MedicationScreen()
             }
             composable(Screen.SiteCare.route) {
                 SiteCareScreen()
+            }
+            composable(Screen.Inventory.route) {
+                InventoryScreen()
+            }
+            composable(Screen.Profile.route) {
+                ProfileScreen()
             }
     }
 }
