@@ -140,7 +140,14 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             Spacer(modifier = Modifier.height(10.dp))
 
             Text("Title: ${entry._title}", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
-            Text("Type: ${entry._type}", color = MaterialTheme.colorScheme.onSurface)
+
+            Row {
+                Text("Type: ${entry._type}", color = MaterialTheme.colorScheme.onPrimary)
+
+                if (entry is FeedEntry)
+                    Text(" • ${entry._feedType}", color = MaterialTheme.colorScheme.onPrimary)
+            }
+
             Text("Amount: ${entry._amount} ${entry._unit}", color =MaterialTheme.colorScheme.onSurface)
             Text("Notes: ${entry._notes}", color = MaterialTheme.colorScheme.onSurface)
 
@@ -195,8 +202,10 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
         ){
             Button(
                 onClick = {
-                    if (entry is FeedEntry || entry is FlushEntry)
-                        insertEntry(FeedEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes))
+                    if (entry is FeedEntry)
+                        insertEntry(FeedEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._feedType))
+                    if (entry is FlushEntry)
+                        insertEntry(FlushEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes))
                     if (entry is MedicationEntry)
                         insertEntry(MedicationEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), medActualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._medType, entry._medicationName))
 
@@ -618,7 +627,8 @@ fun ScheduleScreen() {
                                             ),
                                             amountSliderValue.toDouble(),
                                             EntryUnits.mL,
-                                            newNotes
+                                            newNotes,
+                                            selectedFeedType
                                         )
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 1) {
@@ -766,12 +776,21 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier.padding(start = 8.dp)
                 )
-                Text(
-                    text = entry._type.toString(),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+                Row {
+                    Text(
+                        text = entry._type.toString(),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                    if (entry is FeedEntry){
+                        Text(
+                            text = " • " + entry._feedType.toString(),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSecondary
+                        )
+                    }
+                }
             }
         }
     }
