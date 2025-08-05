@@ -163,7 +163,7 @@ fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
         Button(
             onClick = onDelete,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(186,26,26),
+                containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = Color.White,
             ), modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -701,7 +701,7 @@ fun FeedingLogScreen() {
                                 }
 
                             }, colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(81, 130, 66),
+                                containerColor = MaterialTheme.colorScheme.tertiary,
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.75f)
@@ -726,7 +726,7 @@ fun FeedingLogScreen() {
                                     }
                                 }
                             }, colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(186, 26, 26),
+                                containerColor = MaterialTheme.colorScheme.surface,
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.25f)

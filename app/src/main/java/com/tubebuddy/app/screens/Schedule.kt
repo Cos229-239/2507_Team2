@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.materialIcon
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -212,7 +213,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                     onDismiss()
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(81,130,66),
+                    containerColor = MaterialTheme.colorScheme.tertiary,
                     contentColor = Color.White,
                 ), modifier = Modifier.weight(0.75f)
                     .padding(16.dp)
@@ -229,7 +230,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             Button(
                 onClick = onDelete,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(186,26,26),
+                    containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = Color.White,
             ), modifier = Modifier.weight(0.25f)
                 .padding(16.dp)
@@ -683,7 +684,7 @@ fun ScheduleScreen() {
 
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(81, 130, 66),
+                                containerColor = MaterialTheme.colorScheme.tertiary,
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.75f)
@@ -709,7 +710,7 @@ fun ScheduleScreen() {
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(186, 26, 26),
+                                containerColor = MaterialTheme.colorScheme.surface,
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.25f)

@@ -45,15 +45,19 @@ fun AppTopNavBar(navController : NavHostController) {
         },
         navigationIcon = {
             // Shows back button if not at start destination
-            val isStartDestination = currentRoute == Screen.Home.route
-            if(!isStartDestination && navController.previousBackStackEntry != null) {
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                }
-            }
+
+
+//            val isStartDestination = currentRoute == Screen.Home.route
+//            if(!isStartDestination && navController.previousBackStackEntry != null) {
+//                IconButton(onClick = { navController.navigateUp() }) {
+//                    Icon(
+//                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                        contentDescription = "Back"
+//                    )
+//                }
+//            }
+
+
             // add burger here later
             // else if current == home.route = showDrawer
         },

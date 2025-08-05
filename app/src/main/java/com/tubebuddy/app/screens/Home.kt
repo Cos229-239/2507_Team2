@@ -63,15 +63,16 @@ fun HomeScreen() {
                     ) {
                         Text(
                             "Schedule Overview",
+                            modifier = Modifier.padding(start = 8.dp, top = 8.dp),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 18.sp,
                             color = MaterialTheme.colorScheme.onBackground)
-                        IconButton(onClick = { } ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = "Add to schedule",
-                                tint = MaterialTheme.colorScheme.primary) // color added here to hide the add button for now
-                        }
+//                        IconButton(onClick = { } ) {
+//                            Icon(
+//                                Icons.Default.Add,
+//                                contentDescription = "Add to schedule",
+//                                tint = MaterialTheme.colorScheme.primary) // color added here to hide the add button for now
+//                        }
                     }
 
                     if(_schedule.isEmpty()) {
@@ -125,6 +126,7 @@ fun HomeScreen() {
                     ) {
                         Text(
                             "Log Overview",
+                            modifier = Modifier.padding(start = 8.dp),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 18.sp,
                             color = MaterialTheme.colorScheme.onBackground)
@@ -133,6 +135,7 @@ fun HomeScreen() {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = "Inventory Low",
+                                modifier = Modifier.padding(end = 4.dp),
                                 color = Color.Red,
                                 fontSize = 12.sp,
                             )
@@ -142,7 +145,7 @@ fun HomeScreen() {
                                 tint = Color.Red,
                                 modifier = Modifier
                                     .size(16.dp)
-                                    .padding(start = 4.dp)
+                                    .padding(end = 8.dp)
                             )
                         }
                     }
@@ -179,15 +182,15 @@ fun HomeScreen() {
         }
 
         // Floating Add Button
-        FloatingActionButton(
-            onClick = { /* Add schedule item */ },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(24.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.tertiary
-        ) {
-            Text(text = "+", fontSize = 24.sp)
-        }
+//        FloatingActionButton(
+//            onClick = { /* Add schedule item */ },
+//            modifier = Modifier
+//                .align(Alignment.BottomEnd)
+//                .padding(24.dp),
+//            containerColor = MaterialTheme.colorScheme.surface,
+//            contentColor = MaterialTheme.colorScheme.tertiary
+//        ) {
+//            Text(text = "+", fontSize = 24.sp)
+//        }
     }
 }
