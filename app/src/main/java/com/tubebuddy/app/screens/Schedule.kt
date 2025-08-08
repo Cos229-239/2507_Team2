@@ -86,6 +86,7 @@ import com.tubebuddy.app.ui.components.itemCheckedMap
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import kotlin.math.roundToInt
 
 //Schedule Detail Sheet
@@ -401,8 +402,19 @@ fun ScheduleScreen() {
             }
         }
 
-        /*
         //TODO: remove this button, for testing only
+        FloatingActionButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp, end = 285.dp),
+            onClick = { clearAndPopulateWithStandardItems() },
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.tertiary
+        ) {
+            Text(text = "Populate", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
+        }
+
+        //TODO: remove this button, for testing new day only
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -413,7 +425,7 @@ fun ScheduleScreen() {
         ) {
             Text(text = "Test New Day", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
         }
-         */
+
 
         //Add new Schedule Item Button
         FloatingActionButton(
@@ -878,13 +890,26 @@ fun ScheduleBuddyCard(entry: Entry,
                 }
             }
             Column {
-                Text(
-                    text = entry._title,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier.padding(start = 8.dp),
-                    textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None
-                )
+
+                Row {
+                    Text(
+                        text = entry._title,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        modifier = Modifier.padding(start = 8.dp),
+                        textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None
+                    )
+
+                    if (entry._repeats) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Repeat",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .5f),
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
+                }
+
                 Row {
                     Text(
                         text = entry._type.toString(),
@@ -952,4 +977,83 @@ fun newDayClearCompleteEntries(context: Context) {
     itemCheckedMap.keys.filter { it._repeats }.forEach {
         itemCheckedMap[it] = false
     }
+}
+
+fun clearAndPopulateWithStandardItems(){
+    val today = LocalDate.now()
+
+    _schedule.clear()
+
+    insertScheduleEntry (FeedEntry(
+        _type = EntryType.FEED,
+        _complete = false,
+        _repeats = true,
+        _title = "Morning Feed",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 9,0),
+        _amount = 50.0,
+        _unit = EntryUnits.mL,
+        _notes = "",
+        _feedType = FeedType.BOLUS
+    ))
+
+    insertScheduleEntry (FeedEntry(
+        _type = EntryType.FEED,
+        _complete = false,
+        _repeats = false,
+        _title = "Mid-Day Feed",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 12,0),
+        _amount = 50.0,
+        _unit = EntryUnits.mL,
+        _notes = "Afternoon Note",
+        _feedType = FeedType.PUMP
+    ))
+
+    insertScheduleEntry( FeedEntry(
+        _type = EntryType.FEED,
+        _complete = false,
+        _repeats = true,
+        _title = "Evening Feed",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 18,0),
+        _amount = 50.0,
+        _unit = EntryUnits.mL,
+        _notes = "",
+        _feedType = FeedType.GRAVITY
+    ))
+
+
+    insertScheduleEntry( FlushEntry(
+        _type = EntryType.FLUSH,
+        _complete = false,
+        _repeats = false,
+        _title = "Afternoon Flush",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 13,0),
+        _amount = 10.0,
+        _unit = EntryUnits.mL,
+        _notes = ""
+    ))
+
+    insertScheduleEntry( FlushEntry(
+        _type = EntryType.FLUSH,
+        _complete = false,
+        _repeats = false,
+        _title = "One-Time Evening Flush",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 19,0),
+        _amount = 20.0,
+        _unit = EntryUnits.mL,
+        _notes = "Flush after dinner"
+    ))
+
+    // --- Medication Entry (repeating) ---
+    insertScheduleEntry( MedicationEntry(
+        _type = EntryType.MEDICINE,
+        _complete = false,
+        _repeats = true,
+        _title = "Mid-Day Medication",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 14,0),
+        _amount = 5.0,
+        _unit = EntryUnits.mg,
+        _notes = "Pain relief",
+        _medType = MedType.ORAL,
+        _medicationName = "Tylenol"
+    ))
 }
