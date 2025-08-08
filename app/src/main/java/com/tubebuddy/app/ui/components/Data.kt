@@ -1,8 +1,11 @@
 package com.tubebuddy.app.ui.components
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import java.time.LocalDateTime
 
+val itemCheckedMap = mutableStateMapOf<Entry, Boolean>()
 
 enum class EntryType{
     FEED, FLUSH, MEDICINE

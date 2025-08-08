@@ -1,11 +1,15 @@
 package com.tubebuddy.app.navigation
 
+import android.R
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -14,8 +18,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -26,6 +34,8 @@ fun AppTopNavBar(navController : NavHostController) {
     // Get current back stack entry // Set as current route
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    var isFilterMenuTapped by remember { mutableStateOf(false) }
 
     // Determine screen
     val currentScreen = when(currentRoute) {
@@ -62,6 +72,52 @@ fun AppTopNavBar(navController : NavHostController) {
             // else if current == home.route = showDrawer
         },
         actions = {
+            if (currentScreen == Screen.Schedule) {
+                IconButton(onClick = {
+                    isFilterMenuTapped = true
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowDropDown,
+                        contentDescription = "Filter",
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = isFilterMenuTapped,
+                    onDismissRequest = { isFilterMenuTapped = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Show All", color = MaterialTheme.colorScheme.surface) },
+                        onClick = {
+                            isFilterMenuTapped = false
+                            //code
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Feeds", color = MaterialTheme.colorScheme.surface) },
+                        onClick = {
+                            isFilterMenuTapped = false
+                            //code
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Flushes", color = MaterialTheme.colorScheme.surface) },
+                        onClick = {
+                            isFilterMenuTapped = false
+                            //code
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Medications", color = MaterialTheme.colorScheme.surface) },
+                        onClick = {
+                            isFilterMenuTapped = false
+                            //code
+                        }
+                    )
+                }
+            }
+
             IconButton(onClick = {
                 navController.navigate(Screen.Profile.route) {
                     popUpTo(navController.graph.startDestinationId) {

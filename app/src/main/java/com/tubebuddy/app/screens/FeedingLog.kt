@@ -705,7 +705,7 @@ fun FeedingLogScreen() {
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.75f)
-                                .padding(16.dp)
+                                .padding(start = 16.dp)
                                 .height(50.dp)
                                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)),
                             shape = RoundedCornerShape(8.dp)
@@ -730,7 +730,7 @@ fun FeedingLogScreen() {
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.25f)
-                                .padding(16.dp)
+                                .padding(start = 16.dp, end = 16.dp)
                                 .height(50.dp)
                                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)),
                             shape = RoundedCornerShape(8.dp)
@@ -739,7 +739,7 @@ fun FeedingLogScreen() {
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "Cancel"
                             )
-                            Text("Cancel")
+                            //Text("Cancel")
                         }
                     }
                 }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -27,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -52,6 +54,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,6 +77,7 @@ import com.tubebuddy.app.ui.components.FlushEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
 import com.tubebuddy.app.ui.components._schedule
+import com.tubebuddy.app.ui.components.itemCheckedMap
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -216,7 +221,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                     containerColor = MaterialTheme.colorScheme.tertiary,
                     contentColor = Color.White,
                 ), modifier = Modifier.weight(0.75f)
-                    .padding(16.dp)
+                    .padding(start=16.dp)
                     .height(50.dp)
                     .shadow(5.dp, shape = RoundedCornerShape(8.dp)), shape = RoundedCornerShape(8.dp)
             ) {
@@ -233,7 +238,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = Color.White,
             ), modifier = Modifier.weight(0.25f)
-                .padding(16.dp)
+                .padding(start = 16.dp,end = 16.dp)
                 .height(50.dp)
                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)), shape = RoundedCornerShape(8.dp)) {
                 Icon(
@@ -305,10 +310,65 @@ fun ScheduleScreen() {
             ) {
                 //displays each entry in log
                 items(_schedule) {
-                    entry->ScheduleBuddyCard(entry, modifier = Modifier
+                    scheduledItem -> val isItChecked = itemCheckedMap.getOrDefault(scheduledItem, false)
+
+                    ScheduleBuddyCard(scheduledItem, modifier = Modifier
                     .size(width = 380.dp, height = 94.dp)
                     .padding(bottom = 18.dp)
-                    .clickable { tappedCard = entry })
+                    .clickable { tappedCard = scheduledItem },
+                        isChecked = isItChecked,
+                        onCheckChecked = { isNowChecked -> itemCheckedMap[scheduledItem] = isNowChecked
+
+                            if (isNowChecked) {
+                                if (scheduledItem is FeedEntry)
+                                    insertEntry(
+                                        FeedEntry(
+                                            scheduledItem._type,
+                                            _complete = true,
+                                            _repeats = false,
+                                            scheduledItem._title,
+                                            LocalDateTime.now(),
+                                            scheduledItem._amount,
+                                            scheduledItem._unit,
+                                            scheduledItem._notes,
+                                            scheduledItem._feedType
+                                        )
+                                    )
+                                if (scheduledItem is FlushEntry)
+                                    insertEntry(
+                                        FlushEntry(
+                                            scheduledItem._type,
+                                            _complete = true,
+                                            _repeats = false,
+                                            scheduledItem._title,
+                                            LocalDateTime.now(),
+                                            scheduledItem._amount,
+                                            scheduledItem._unit,
+                                            scheduledItem._notes
+                                        )
+                                    )
+                                if (scheduledItem is MedicationEntry)
+                                    insertEntry(
+                                        MedicationEntry(
+                                            scheduledItem._type,
+                                            _complete = true,
+                                            _repeats = false,
+                                            scheduledItem._title,
+                                            LocalDateTime.now(),
+                                            scheduledItem._amount,
+                                            scheduledItem._unit,
+                                            scheduledItem._notes,
+                                            scheduledItem._medType,
+                                            scheduledItem._medicationName
+                                        )
+                                    )
+                            }
+                            else{
+
+                            }
+
+                        }
+                        )
                 }
             }
         }
@@ -714,7 +774,7 @@ fun ScheduleScreen() {
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.25f)
-                                .padding(16.dp)
+                                .padding(top = 16.dp, end=16.dp)
                                 .height(50.dp)
                                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)),
                             shape = RoundedCornerShape(8.dp)
@@ -723,7 +783,7 @@ fun ScheduleScreen() {
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "Cancel"
                             )
-                            Text("Cancel")
+                            //Text("Cancel")
                         }
                     }
                 }
@@ -735,7 +795,12 @@ fun ScheduleScreen() {
 
 //Generate Schedule Buddy Cards
 @Composable
-fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
+fun ScheduleBuddyCard(entry: Entry,
+                      modifier: Modifier = Modifier,
+                      isChecked: Boolean,
+                      onCheckChecked: (Boolean) -> Unit) {
+
+    Row{
 
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -753,7 +818,7 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     .size(width = 64.dp, height = 56.dp)
                     .padding(start = 8.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = if (isChecked) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f) else MaterialTheme.colorScheme.primary
                 )
             ) {
                 Column(
@@ -775,7 +840,8 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     text = entry._title,
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier.padding(start = 8.dp)
+                    modifier = Modifier.padding(start = 8.dp),
+                    textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None
                 )
                 Row {
                     Text(
@@ -784,7 +850,7 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                         color = MaterialTheme.colorScheme.onSecondary,
                         modifier = Modifier.padding(start = 8.dp)
                     )
-                    if (entry is FeedEntry){
+                    if (entry is FeedEntry) {
                         Text(
                             text = " • " + entry._feedType.toString(),
                             fontSize = 12.sp,
@@ -793,7 +859,17 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     }
                 }
             }
+            Row(modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+                ) {
+                Checkbox(
+                    checked = isChecked,
+                    onCheckedChange = onCheckChecked
+                )
+            }
         }
+    }
     }
 }
 

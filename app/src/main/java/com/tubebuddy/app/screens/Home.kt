@@ -31,6 +31,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tubebuddy.app.ui.components.Entry
+import com.tubebuddy.app.ui.components.FeedEntry
 import com.tubebuddy.app.ui.components._entryLog
 import com.tubebuddy.app.ui.components._schedule
 
@@ -94,11 +96,13 @@ fun HomeScreen() {
                                 .fillMaxSize()
                         ) {
                             items(_schedule) { entry->
-                                ScheduleBuddyCard(
+                                HomeBuddyCard(
                                     entry,
                                     modifier = Modifier
                                         .size(width = 380.dp, height = 84.dp)
                                         .padding(bottom = 8.dp))
+
+
                                         //.clickable { tappedCard = entry })
                             }
                         }
@@ -192,5 +196,67 @@ fun HomeScreen() {
 //        ) {
 //            Text(text = "+", fontSize = 24.sp)
 //        }
+    }
+}
+
+@Composable
+fun HomeBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
+    Card(
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Card(
+                modifier = Modifier
+                    .size(width = 64.dp, height = 56.dp)
+                    .padding(start = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+
+                ) {
+
+                    Text(
+                        text = scheduleFormatShortTime(entry._time),
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+            }
+            Column {
+                Text(
+                    text = entry._title,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+                Row {
+                    Text(
+                        text = entry._type.toString(),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                    if (entry is FeedEntry){
+                        Text(
+                            text = " • " + entry._feedType.toString(),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSecondary
+                        )
+                    }
+                }
+            }
+        }
     }
 }
