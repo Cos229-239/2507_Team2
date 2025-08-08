@@ -63,11 +63,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Context
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.runtime.LaunchedEffect
 import com.tubebuddy.app.ui.components.Entry
 import com.tubebuddy.app.ui.components.EntryType
 import com.tubebuddy.app.ui.components.EntryUnits
@@ -77,6 +81,7 @@ import com.tubebuddy.app.ui.components.FlushEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
 import com.tubebuddy.app.ui.components._schedule
+import com.tubebuddy.app.ui.components.isNewDay
 import com.tubebuddy.app.ui.components.itemCheckedMap
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -91,6 +96,9 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
     val medActualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
     var timeString by remember { mutableStateOf("") }
     var minuteString by remember { mutableStateOf("") }
+
+    //context to be used to check if it is a new day
+    val context = LocalContext.current
 
     if (entry._time.minute < 10){
         minuteString = '0' + entry._time.minute.toString()
@@ -145,8 +153,21 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Text("Title: ${entry._title}", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
-
+            Row {
+                Text(
+                    "Title: ${entry._title}",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium
+                )
+                if (entry._repeats) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = "Repeat",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .5f),
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+            }
             Row {
                 Text("Type: ${entry._type}", color = MaterialTheme.colorScheme.onPrimary)
 
@@ -255,8 +276,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 @Composable
 fun ScheduleScreen() {
 
-    //context for toast
-    //val context = LocalContext.current
+    val schedContext = LocalContext.current
 
     //sheet
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -292,6 +312,14 @@ fun ScheduleScreen() {
         initialMinute = currentTime.get(Calendar.MINUTE),
         is24Hour = false,
     )
+
+    //code that runs each time the schedule screen appears
+    //check if its a new day to clear old (non-repeating) schedule items
+    LaunchedEffect(Unit) {
+        if (isNewDay(schedContext)){
+            newDayClearCompleteEntries(schedContext)
+        }
+    }
 
     //Main Schedule Screen
     Box(
@@ -372,6 +400,20 @@ fun ScheduleScreen() {
                 }
             }
         }
+
+        /*
+        //TODO: remove this button, for testing only
+        FloatingActionButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp, end = 100.dp),
+            onClick = { newDayClearCompleteEntries(schedContext) },
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.tertiary
+        ) {
+            Text(text = "Test New Day", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
+        }
+         */
 
         //Add new Schedule Item Button
         FloatingActionButton(
@@ -892,5 +934,22 @@ fun scheduleFormatShortTime(dateTime: LocalDateTime): String {
         dateTime.hour == 12 -> "12p"
         dateTime.hour > 12 -> "${dateTime.hour - 12}p"
         else -> "${dateTime.hour}a"
+    }
+}
+
+fun newDayClearCompleteEntries(context: Context) {
+    val entriesToRemove = itemCheckedMap.filter { (entry, isChecked) ->
+        isChecked && !entry._repeats
+    }.keys
+
+    _schedule.removeAll(entriesToRemove)
+
+    entriesToRemove.forEach {
+        itemCheckedMap.remove(it)
+    }
+
+    //reset checkboxes for repeating entries
+    itemCheckedMap.keys.filter { it._repeats }.forEach {
+        itemCheckedMap[it] = false
     }
 }

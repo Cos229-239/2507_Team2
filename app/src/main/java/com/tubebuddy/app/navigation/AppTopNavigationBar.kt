@@ -72,7 +72,7 @@ fun AppTopNavBar(navController : NavHostController) {
             // else if current == home.route = showDrawer
         },
         actions = {
-            if (currentScreen == Screen.Schedule) {
+            if (currentScreen == Screen.Schedule || currentScreen == Screen.FeedingLog) {
                 IconButton(onClick = {
                     isFilterMenuTapped = true
                 }) {
