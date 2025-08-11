@@ -693,7 +693,12 @@ fun ScheduleScreen() {
                             onClick = {
 
                                 if (newLogName.isEmpty()){
-                                    Toast.makeText(schedContext, "Please enter a Title", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(schedContext, "Please enter a title", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+
+                                if (newItemCategoriesSelectedIndex == 2 && selectedMedication.isBlank()){
+                                    Toast.makeText(schedContext, "Please select a medication.", Toast.LENGTH_SHORT).show()
                                     return@Button
                                 }
 

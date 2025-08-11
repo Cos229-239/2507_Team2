@@ -602,12 +602,17 @@ fun FeedingLogScreen() {
                             onClick = {
 
                                 if (newLogName.isEmpty()){
-                                    Toast.makeText(logContext, "Please enter a Title.", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(logContext, "Please enter a title.", Toast.LENGTH_SHORT).show()
                                     return@Button
                                 }
 
                                 if (!isValidDate(yearString, selectedMonth, dayString)){
                                     Toast.makeText(logContext, "Please enter a valid date.", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+
+                                if (newItemCategoriesSelectedIndex == 2 && selectedMedication.isBlank()){
+                                    Toast.makeText(logContext, "Please select a medication.", Toast.LENGTH_SHORT).show()
                                     return@Button
                                 }
 
