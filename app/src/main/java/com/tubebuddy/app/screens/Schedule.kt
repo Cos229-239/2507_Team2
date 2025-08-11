@@ -70,8 +70,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
 import com.tubebuddy.app.ui.components.Entry
 import com.tubebuddy.app.ui.components.EntryType
 import com.tubebuddy.app.ui.components.EntryUnits
@@ -93,33 +95,11 @@ import kotlin.math.roundToInt
 @Composable
 fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
-    val actualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
-    val medActualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
-    var timeString by remember { mutableStateOf("") }
-    var minuteString by remember { mutableStateOf("") }
+    val actualAmountSliderValue = remember(entry) { mutableFloatStateOf(entry._amount.toFloat()) }
+    val medActualAmountSliderValue = remember(entry) { mutableFloatStateOf(entry._amount.toFloat()) }
 
     //context to be used to check if it is a new day
     val context = LocalContext.current
-
-    if (entry._time.minute < 10){
-        minuteString = '0' + entry._time.minute.toString()
-    }
-    else{
-        minuteString = entry._time.minute.toString()
-    }
-
-    if (entry._time.hour == 0){
-        timeString = "12:" + minuteString + " AM"
-    }
-    else if (entry._time.hour > 12){
-        timeString = (entry._time.hour-12).toString() + ":" + minuteString + " PM"
-    }
-    else if (entry._time.hour == 12){
-        timeString = "12:" + minuteString + " PM"
-    }
-    else{
-        timeString = entry._time.hour.toString() + ":" + minuteString + " AM"
-    }
 
     Box(
         modifier = Modifier
@@ -145,7 +125,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(text = timeString,
+                    Text(text = logFormatTime(entry._time),
                         fontSize = 18.sp,
                         color = Color.White,
                         fontWeight = FontWeight.Medium)
@@ -189,8 +169,8 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             if (entry._type == EntryType.MEDICINE){
 
                 Slider(
-                    value = medActualAmountSliderValue.value,
-                    onValueChange = { medActualAmountSliderValue.value = it },
+                    value = medActualAmountSliderValue.floatValue,
+                    onValueChange = { medActualAmountSliderValue.floatValue = it.roundToInt().toFloat() },
                     valueRange = 0f..10f,
                     steps = 9,
                     colors = SliderDefaults.colors(
@@ -201,15 +181,15 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                         inactiveTickColor = MaterialTheme.colorScheme.tertiary,
                     )
                 )
-                Text(text = medActualAmountSliderValue.value.roundToInt().toString() + " mg", color = MaterialTheme.colorScheme.onSurface)
+                Text(text = medActualAmountSliderValue.floatValue.roundToInt().toString() + " mg", color = MaterialTheme.colorScheme.onSurface)
             }
             else{
 
                 Slider(
-                    value = actualAmountSliderValue.value,
-                    onValueChange = { actualAmountSliderValue.value = it },
+                    value = actualAmountSliderValue.floatValue,
+                    onValueChange = { actualAmountSliderValue.floatValue = it.roundToInt().toFloat() },
                     valueRange = 0f..100f,
-                    steps = 99,
+                    steps = 0,
                     colors = SliderDefaults.colors(
                         thumbColor = MaterialTheme.colorScheme.tertiary,
                         activeTrackColor = MaterialTheme.colorScheme.tertiary,
@@ -218,7 +198,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                         inactiveTickColor = MaterialTheme.colorScheme.tertiary,
                     )
                 )
-                Text(text = actualAmountSliderValue.value.roundToInt().toString() + " mL", color = MaterialTheme.colorScheme.onSurface)
+                Text(text = actualAmountSliderValue.floatValue.roundToInt().toString() + " mL", color = MaterialTheme.colorScheme.onSurface)
             }
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -231,11 +211,11 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             Button(
                 onClick = {
                     if (entry is FeedEntry)
-                        insertEntry(FeedEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._feedType))
+                        insertEntry(FeedEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.floatValue.toDouble(), entry._unit, entry._notes, entry._feedType))
                     if (entry is FlushEntry)
-                        insertEntry(FlushEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes))
+                        insertEntry(FlushEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.floatValue.toDouble(), entry._unit, entry._notes))
                     if (entry is MedicationEntry)
-                        insertEntry(MedicationEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), medActualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._medType, entry._medicationName))
+                        insertEntry(MedicationEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), medActualAmountSliderValue.floatValue.toDouble(), entry._unit, entry._notes, entry._medType, entry._medicationName))
 
                     onDismiss()
                 },
@@ -328,7 +308,7 @@ fun ScheduleScreen() {
         contentAlignment = Alignment.Center
     ) {
         //if log is empty display basic text
-        if (!(_schedule.size >= 1))
+        if (_schedule.isEmpty())
             Text(text = "No Scheduled Items", fontSize = 30.sp, color = MaterialTheme.colorScheme.onPrimary)
         else{
             LazyColumn(
@@ -391,9 +371,6 @@ fun ScheduleScreen() {
                                             scheduledItem._medicationName
                                         )
                                     )
-                            }
-                            else{
-
                             }
 
                         }
@@ -585,9 +562,9 @@ fun ScheduleScreen() {
                         //-----------mL Amount Slider
                         Slider(
                             value = amountSliderValue,
-                            onValueChange = { amountSliderValue = it },
+                            onValueChange = { amountSliderValue = it.roundToInt().toFloat() },
                             valueRange = 0f..100f,
-                            steps = 99,
+                            steps = 0,
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.tertiary,
                                 activeTrackColor = MaterialTheme.colorScheme.tertiary,
@@ -605,7 +582,7 @@ fun ScheduleScreen() {
                         //-----------mg (medication) Amount Slider
                         Slider(
                             value = medAmountSliderValue,
-                            onValueChange = { medAmountSliderValue = it },
+                            onValueChange = { medAmountSliderValue = it.roundToInt().toFloat() },
                             valueRange = 0f..10f,
                             steps = 9,
                             colors = SliderDefaults.colors(
@@ -714,6 +691,11 @@ fun ScheduleScreen() {
                         //-----------Add Item Button
                         Button(
                             onClick = {
+
+                                if (newLogName.isEmpty()){
+                                    Toast.makeText(schedContext, "Please enter a Title", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
 
                                 if (newItemCategoriesSelectedIndex == 0) {
                                     //feed entry
@@ -1040,7 +1022,7 @@ fun clearAndPopulateWithStandardItems(){
         _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 19,0),
         _amount = 20.0,
         _unit = EntryUnits.mL,
-        _notes = "Flush after dinner"
+        _notes = "Flush after feed"
     ))
 
     // --- Medication Entry (repeating) ---
@@ -1052,7 +1034,7 @@ fun clearAndPopulateWithStandardItems(){
         _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 14,0),
         _amount = 5.0,
         _unit = EntryUnits.mg,
-        _notes = "Pain relief",
+        _notes = "",
         _medType = MedType.ORAL,
         _medicationName = "Tylenol"
     ))
