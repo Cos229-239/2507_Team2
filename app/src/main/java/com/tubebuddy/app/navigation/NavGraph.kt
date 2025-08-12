@@ -2,21 +2,23 @@ package com.tubebuddy.app.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.tubebuddy.app.firebase.AuthViewModel
 import com.tubebuddy.app.screens.FeedingLogScreen
 import com.tubebuddy.app.screens.HomeScreen
-import com.tubebuddy.app.screens.MedicationScreen
-import com.tubebuddy.app.screens.ScheduleScreen
-import com.tubebuddy.app.screens.SiteCareScreen
 import com.tubebuddy.app.screens.InventoryScreen
 import com.tubebuddy.app.screens.ProfileScreen
+import com.tubebuddy.app.screens.ScheduleScreen
+import com.tubebuddy.app.screens.SiteCareScreen
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel = viewModel()
     ) {
         NavHost(
             navController = navController,
@@ -32,9 +34,6 @@ fun AppNavHost(
             composable(Screen.FeedingLog.route) {
                 FeedingLogScreen()
             }
-            composable(Screen.Medication.route) { //NEEDS TO BE REMOVED
-                MedicationScreen()
-            }
             composable(Screen.SiteCare.route) {
                 SiteCareScreen()
             }
@@ -42,7 +41,7 @@ fun AppNavHost(
                 InventoryScreen()
             }
             composable(Screen.Profile.route) {
-                ProfileScreen()
+                ProfileScreen(authViewModel)
             }
     }
 }
