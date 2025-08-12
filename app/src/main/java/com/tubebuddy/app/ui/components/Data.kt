@@ -39,7 +39,8 @@ data class FeedEntry(
     override val _time: LocalDateTime,
     override val _amount: Double,
     override val _unit: EntryUnits,
-    override val _notes: String
+    override val _notes: String,
+    val _feedType: FeedType
 ) : Entry
 
 data class FlushEntry(

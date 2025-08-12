@@ -140,7 +140,14 @@ fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             Spacer(modifier = Modifier.height(10.dp))
 
             Text("Title: ${entry._title}", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Medium)
-            Text("Type: ${entry._type}", color = MaterialTheme.colorScheme.onPrimary)
+
+            Row {
+                Text("Type: ${entry._type}", color = MaterialTheme.colorScheme.onPrimary)
+
+                if (entry is FeedEntry)
+                    Text(" • ${entry._feedType}", color = MaterialTheme.colorScheme.onPrimary)
+            }
+
             Text("Amount: ${entry._amount} ${entry._unit}", color = MaterialTheme.colorScheme.onPrimary)
             Text("Notes: ${entry._notes}", color = MaterialTheme.colorScheme.onPrimary)
 
@@ -639,7 +646,8 @@ fun FeedingLogScreen() {
                                             ),
                                             amountSliderValue.toDouble(),
                                             EntryUnits.mL,
-                                            newNotes
+                                            newNotes,
+                                            selectedFeedType
                                         )
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 1) {
@@ -797,12 +805,22 @@ fun LogBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier.padding(start = 8.dp)
                 )
-                Text(
-                    text = logFormatTime(entry._time) + " • " + entry._type.toString(),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+
+                Row {
+                    Text(
+                        text = logFormatTime(entry._time) + " • " + entry._type.toString(),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                    if (entry is FeedEntry) {
+                        Text(
+                            text = " • " + entry._feedType.toString(),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSecondary,
+                        )
+                    }
+                }
             }
         }
     }
