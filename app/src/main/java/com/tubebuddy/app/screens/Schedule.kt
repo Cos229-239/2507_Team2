@@ -75,9 +75,11 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import com.tubebuddy.app.ui.components.Entry
+import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components.EntryType
 import com.tubebuddy.app.ui.components.EntryUnits
 import com.tubebuddy.app.ui.components.FeedEntry
+import com.tubebuddy.app.ui.components.FilterType
 import com.tubebuddy.app.ui.components.FeedType
 import com.tubebuddy.app.ui.components.FlushEntry
 import com.tubebuddy.app.ui.components.MedType
@@ -320,6 +322,22 @@ fun ScheduleScreen() {
                 //displays each entry in log
                 items(_schedule) {
                     scheduledItem -> val isItChecked = itemCheckedMap.getOrDefault(scheduledItem, false)
+
+                    //filter
+                    if (_currFilter.value!= FilterType.ALL_FILTER){
+                        if (_currFilter.value==FilterType.FEED_FILTER){
+                            if (scheduledItem._type != EntryType.FEED)
+                                return@items
+                        }
+                        if (_currFilter.value==FilterType.FLUSH_FILTER){
+                            if (scheduledItem._type != EntryType.FLUSH)
+                                return@items
+                        }
+                        if (_currFilter.value==FilterType.MEDICINE_FILTER){
+                            if (scheduledItem._type != EntryType.MEDICINE)
+                                return@items
+                        }
+                    }
 
                     ScheduleBuddyCard(scheduledItem, modifier = Modifier
                     .size(width = 380.dp, height = 94.dp)

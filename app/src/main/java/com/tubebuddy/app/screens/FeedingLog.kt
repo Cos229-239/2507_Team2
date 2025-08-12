@@ -71,9 +71,11 @@ import com.tubebuddy.app.ui.components.EntryType
 import com.tubebuddy.app.ui.components.EntryUnits
 import com.tubebuddy.app.ui.components.FeedEntry
 import com.tubebuddy.app.ui.components.FeedType
+import com.tubebuddy.app.ui.components.FilterType
 import com.tubebuddy.app.ui.components.FlushEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
+import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components._entryLog
 import kotlinx.coroutines.launch
 import java.time.DateTimeException
@@ -220,7 +222,23 @@ fun FeedingLogScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 //displays each entry in log
-                items(_entryLog) { entry ->
+                items(_entryLog) {
+                    //filter
+                    entry -> if (_currFilter.value!= FilterType.ALL_FILTER){
+                        if (_currFilter.value==FilterType.FEED_FILTER){
+                            if (entry._type != EntryType.FEED)
+                                return@items
+                        }
+                        if (_currFilter.value==FilterType.FLUSH_FILTER){
+                            if (entry._type != EntryType.FLUSH)
+                                return@items
+                        }
+                        if (_currFilter.value==FilterType.MEDICINE_FILTER){
+                            if (entry._type != EntryType.MEDICINE)
+                                return@items
+                        }
+                    }
+
                     LogBuddyCard(
                         entry,
                         modifier = Modifier

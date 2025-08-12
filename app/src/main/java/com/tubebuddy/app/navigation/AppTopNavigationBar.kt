@@ -27,6 +27,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.tubebuddy.app.ui.components.FilterType
+import com.tubebuddy.app.ui.components._currFilter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,28 +93,28 @@ fun AppTopNavBar(navController : NavHostController) {
                         text = { Text("Show All", color = MaterialTheme.colorScheme.surface) },
                         onClick = {
                             isFilterMenuTapped = false
-                            //code
+                            _currFilter.value = FilterType.ALL_FILTER
                         }
                     )
                     DropdownMenuItem(
                         text = { Text("Feeds", color = MaterialTheme.colorScheme.surface) },
                         onClick = {
                             isFilterMenuTapped = false
-                            //code
+                            _currFilter.value = FilterType.FEED_FILTER
                         }
                     )
                     DropdownMenuItem(
                         text = { Text("Flushes", color = MaterialTheme.colorScheme.surface) },
                         onClick = {
                             isFilterMenuTapped = false
-                            //code
+                            _currFilter.value = FilterType.FLUSH_FILTER
                         }
                     )
                     DropdownMenuItem(
                         text = { Text("Medications", color = MaterialTheme.colorScheme.surface) },
                         onClick = {
                             isFilterMenuTapped = false
-                            //code
+                            _currFilter.value = FilterType.MEDICINE_FILTER
                         }
                     )
                 }
