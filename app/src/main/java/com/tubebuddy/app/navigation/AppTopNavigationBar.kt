@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -80,7 +81,7 @@ fun AppTopNavBar(navController : NavHostController) {
                     isFilterMenuTapped = true
                 }) {
                     Icon(
-                        imageVector = Icons.Filled.ArrowDropDown,
+                        imageVector = Icons.Default.FilterList,
                         contentDescription = "Filter",
                         modifier = Modifier.size(28.dp)
                     )

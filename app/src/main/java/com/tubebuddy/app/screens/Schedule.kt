@@ -71,7 +71,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Replay5
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import com.tubebuddy.app.ui.components.Entry
@@ -397,7 +399,8 @@ fun ScheduleScreen() {
             }
         }
 
-        //TODO: remove this button, for testing only
+        //remove this button, for testing only
+        /*
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -408,8 +411,10 @@ fun ScheduleScreen() {
         ) {
             Text(text = "Populate", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
         }
+         */
 
-        //TODO: remove this button, for testing new day only
+        //remove this button, for testing new day only
+        /*
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -420,6 +425,7 @@ fun ScheduleScreen() {
         ) {
             Text(text = "Test New Day", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
         }
+         */
 
 
         //Add new Schedule Item Button
@@ -907,7 +913,7 @@ fun ScheduleBuddyCard(entry: Entry,
 
                     if (entry._repeats) {
                         Icon(
-                            imageVector = Icons.Filled.Refresh,
+                            imageVector = Icons.Default.Cached,
                             contentDescription = "Repeat",
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .5f),
                             modifier = Modifier.padding(start = 4.dp)
