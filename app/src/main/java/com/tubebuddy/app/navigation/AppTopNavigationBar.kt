@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -94,6 +95,14 @@ fun AppTopNavBar(navController : NavHostController) {
                         onClick = {
                             isFilterMenuTapped = false
                             _currFilter.value = FilterType.ALL_FILTER
+                        },
+                        trailingIcon = {
+                            if (_currFilter.value == FilterType.ALL_FILTER) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = "All Items Filter"
+                                )
+                            }
                         }
                     )
                     DropdownMenuItem(
@@ -101,6 +110,14 @@ fun AppTopNavBar(navController : NavHostController) {
                         onClick = {
                             isFilterMenuTapped = false
                             _currFilter.value = FilterType.FEED_FILTER
+                        },
+                        trailingIcon = {
+                            if (_currFilter.value == FilterType.FEED_FILTER) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = "Feed Items Filter"
+                                )
+                            }
                         }
                     )
                     DropdownMenuItem(
@@ -108,6 +125,14 @@ fun AppTopNavBar(navController : NavHostController) {
                         onClick = {
                             isFilterMenuTapped = false
                             _currFilter.value = FilterType.FLUSH_FILTER
+                        },
+                        trailingIcon = {
+                            if (_currFilter.value == FilterType.FLUSH_FILTER) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = "Flush Items Filter"
+                                )
+                            }
                         }
                     )
                     DropdownMenuItem(
@@ -115,6 +140,14 @@ fun AppTopNavBar(navController : NavHostController) {
                         onClick = {
                             isFilterMenuTapped = false
                             _currFilter.value = FilterType.MEDICINE_FILTER
+                        },
+                        trailingIcon = {
+                            if (_currFilter.value == FilterType.MEDICINE_FILTER) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = "Medication Items Filter"
+                                )
+                            }
                         }
                     )
                 }
