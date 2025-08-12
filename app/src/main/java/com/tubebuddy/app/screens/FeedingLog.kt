@@ -1,6 +1,7 @@
 package com.tubebuddy.app.screens
 
 import android.icu.util.Calendar
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,11 +71,14 @@ import com.tubebuddy.app.ui.components.EntryType
 import com.tubebuddy.app.ui.components.EntryUnits
 import com.tubebuddy.app.ui.components.FeedEntry
 import com.tubebuddy.app.ui.components.FeedType
+import com.tubebuddy.app.ui.components.FilterType
 import com.tubebuddy.app.ui.components.FlushEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
+import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components._entryLog
 import kotlinx.coroutines.launch
+import java.time.DateTimeException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
@@ -85,28 +90,6 @@ enum class MonthList{
 //Schedule Detail Sheet
 @Composable
 fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
-    var timeString by remember { mutableStateOf("") }
-    var minuteString by remember { mutableStateOf("") }
-
-    if (entry._time.minute < 10){
-        minuteString = '0' + entry._time.minute.toString()
-    }
-    else{
-        minuteString = entry._time.minute.toString()
-    }
-
-    if (entry._time.hour == 0){
-        timeString = "12:" + minuteString + " AM"
-    }
-    else if (entry._time.hour > 12){
-        timeString = (entry._time.hour-12).toString() + ":" + minuteString + " PM"
-    }
-    else if (entry._time.hour == 12){
-        timeString = "12:" + minuteString + " PM"
-    }
-    else{
-        timeString = entry._time.hour.toString() + ":" + minuteString + " AM"
-    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -130,7 +113,7 @@ fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(text = timeString,
+                    Text(text = logFormatTime(entry._time),
                         fontSize = 18.sp,
                         color = Color.White,
                         fontWeight = FontWeight.Medium)
@@ -163,7 +146,7 @@ fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
         Button(
             onClick = onDelete,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(186,26,26),
+                containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = Color.White,
             ), modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -184,6 +167,7 @@ fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 fun FeedingLogScreen() {
 
     var logTappedCard by remember { mutableStateOf<Entry?>(null) }
+    val logContext = LocalContext.current
 
     //sheet
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -238,7 +222,23 @@ fun FeedingLogScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 //displays each entry in log
-                items(_entryLog) { entry ->
+                items(_entryLog) {
+                    //filter
+                    entry -> if (_currFilter.value!= FilterType.ALL_FILTER){
+                        if (_currFilter.value==FilterType.FEED_FILTER){
+                            if (entry._type != EntryType.FEED)
+                                return@items
+                        }
+                        if (_currFilter.value==FilterType.FLUSH_FILTER){
+                            if (entry._type != EntryType.FLUSH)
+                                return@items
+                        }
+                        if (_currFilter.value==FilterType.MEDICINE_FILTER){
+                            if (entry._type != EntryType.MEDICINE)
+                                return@items
+                        }
+                    }
+
                     LogBuddyCard(
                         entry,
                         modifier = Modifier
@@ -406,9 +406,9 @@ fun FeedingLogScreen() {
                         //-----------mL Amount Slider
                         Slider(
                             value = amountSliderValue,
-                            onValueChange = { amountSliderValue = it },
+                            onValueChange = { amountSliderValue = it.roundToInt().toFloat() },
                             valueRange = 0f..100f,
-                            steps = 99,
+                            steps = 0,
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.tertiary,
                                 activeTrackColor = MaterialTheme.colorScheme.tertiary,
@@ -426,7 +426,7 @@ fun FeedingLogScreen() {
                         //-----------mg (medication) Amount Slider
                         Slider(
                             value = medAmountSliderValue,
-                            onValueChange = { medAmountSliderValue = it },
+                            onValueChange = { medAmountSliderValue = it.roundToInt().toFloat() },
                             valueRange = 0f..10f,
                             steps = 9,
                             colors = SliderDefaults.colors(
@@ -619,6 +619,21 @@ fun FeedingLogScreen() {
                         Button(
                             onClick = {
 
+                                if (newLogName.isEmpty()){
+                                    Toast.makeText(logContext, "Please enter a title.", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+
+                                if (!isValidDate(yearString, selectedMonth, dayString)){
+                                    Toast.makeText(logContext, "Please enter a valid date.", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+
+                                if (newItemCategoriesSelectedIndex == 2 && selectedMedication.isBlank()){
+                                    Toast.makeText(logContext, "Please select a medication.", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+
                                 if (newItemCategoriesSelectedIndex == 0) {
                                     //feed entry
                                     val selectedFeedType = if (newFeedSelectedIndex == 0) {
@@ -701,11 +716,11 @@ fun FeedingLogScreen() {
                                 }
 
                             }, colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(81, 130, 66),
+                                containerColor = MaterialTheme.colorScheme.tertiary,
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.75f)
-                                .padding(16.dp)
+                                .padding(start = 16.dp)
                                 .height(50.dp)
                                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)),
                             shape = RoundedCornerShape(8.dp)
@@ -726,11 +741,11 @@ fun FeedingLogScreen() {
                                     }
                                 }
                             }, colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(186, 26, 26),
+                                containerColor = MaterialTheme.colorScheme.surface,
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.25f)
-                                .padding(16.dp)
+                                .padding(start = 16.dp, end = 16.dp)
                                 .height(50.dp)
                                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)),
                             shape = RoundedCornerShape(8.dp)
@@ -739,7 +754,7 @@ fun FeedingLogScreen() {
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "Cancel"
                             )
-                            Text("Cancel")
+                            //Text("Cancel")
                         }
                     }
                 }
@@ -837,5 +852,14 @@ fun logFormatTime(dateTime: LocalDateTime): String {
         dateTime.hour == 12 -> "12:$minute PM"
         dateTime.hour > 12 -> "${dateTime.hour - 12}:$minute PM"
         else -> "${dateTime.hour}:$minute AM"
+    }
+}
+
+fun isValidDate(_year: String, _month: MonthList, _day: String) : Boolean{
+    return try {
+        LocalDate.of(_year.toInt(), (_month.ordinal + 1), _day.toInt())
+        true
+    } catch (_: DateTimeException){
+        false
     }
 }

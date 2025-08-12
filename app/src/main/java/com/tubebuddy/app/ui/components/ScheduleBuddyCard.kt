@@ -1,5 +1,6 @@
 package com.tubebuddy.app.ui.components
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.LocalDate
+import androidx.core.content.edit
 
 @Composable
 fun ScheduleBuddyCard(dateTime: String, title: String, description: String, modifier: Modifier = Modifier) {
@@ -87,5 +90,20 @@ fun ScheduleBuddyCard(dateTime: String, title: String, description: String, modi
                 )
             }
         }
+    }
+}
+
+//checks if it is a new day to reset the schedule (except repeat items)
+//also updated latest app open to today's date
+fun isNewDay(context: Context): Boolean {
+    val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val lastOpened = prefs.getString("last_opened_date", null)
+    val today = LocalDate.now().toString()
+
+    return if (lastOpened != today) {
+        prefs.edit { putString("last_opened_date", today) }
+        true
+    } else {
+        false
     }
 }
