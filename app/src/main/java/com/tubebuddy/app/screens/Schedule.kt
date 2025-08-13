@@ -146,7 +146,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                 )
                 if (entry._repeats) {
                     Icon(
-                        imageVector = Icons.Filled.Refresh,
+                        imageVector = Icons.Default.Cached,
                         contentDescription = "Repeat",
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .5f),
                         modifier = Modifier.padding(start = 4.dp)
