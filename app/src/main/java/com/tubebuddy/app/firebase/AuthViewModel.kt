@@ -50,44 +50,39 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun signUp(username: String, email : String, password : String) {
+    fun signUp(email : String, password : String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
-            if(username.isNotEmpty()) {
-                try {
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if(task.isSuccessful) {
-                                val user = FirebaseAuth.getInstance().currentUser
-                                val db = Firebase.firestore
-                                user?.let {
-                                    val userData = User(
-                                        name = username,
-                                        email = email,
-                                        createdAt = Timestamp.now()
-                                    )
+            try {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if(task.isSuccessful) {
+                            val user = FirebaseAuth.getInstance().currentUser
+                            val db = Firebase.firestore
+                            user?.let {
+                                val userData = User(
+                                    email = email,
+                                    createdAt = Timestamp.now(),
+                                    onBoardComplete = false
+                                )
 
-                                    db.collection("users").document(it.uid).set(userData)
-                                        .addOnSuccessListener {
+                                db.collection("users").document(it.uid).set(userData)
+                                    .addOnSuccessListener {
 
-                                        }
-                                        .addOnFailureListener {
+                                    }
+                                    .addOnFailureListener {
 
-                                        }
-                                }
-                            }
-                            else {
-                                val exception = task.exception
-                                _authState.value = AuthState.Error(exception?.message ?: "An error occurred")
+                                    }
                             }
                         }
-                }
-                catch(e: Exception) {
-                    _authState.value = AuthState.Error(e.message ?: "An error occurred")
-                }
+                        else {
+                            val exception = task.exception
+                            _authState.value = AuthState.Error(exception?.message ?: "An error occurred")
+                        }
+                    }
             }
-            else {
-                _authState.value = AuthState.Error("Please enter a username")
+            catch(e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "An error occurred")
             }
         }
     }

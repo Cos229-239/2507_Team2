@@ -80,7 +80,8 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                         Text(
                             text = "${usernameState.value}'s Settings",
                             fontSize = 24.sp,
-                            modifier = Modifier.padding(16.dp))
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onBackground)
 
                         // BEGIN DARK MODE
                         Row(
@@ -91,7 +92,8 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                             Text(
                                 text = "Toggle Dark Mode",
                                 fontSize = 16.sp,
-                                modifier = Modifier.padding(start = 16.dp))
+                                modifier = Modifier.padding(start = 16.dp),
+                                color = MaterialTheme.colorScheme.onBackground)
                             Switch(
                                 checked = isDarkTheme,
                                 onCheckedChange = { isChecked ->
