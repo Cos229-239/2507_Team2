@@ -76,8 +76,27 @@ data class MedicationEntry(
     val _medicationName: String
 ) : Entry
 
+interface MedEntry{
+    val _name: String
+}
+
 val _schedule = mutableStateListOf<Entry>()
 val _entryLog = mutableStateListOf<Entry>()
+val _medLog = mutableStateListOf<MedEntry>(
+    //todo: remove prepopulated items
+    object : MedEntry{
+        override val _name: String
+            get() = "Advil"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Aspirin"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Allegra"
+    }
+)
 var _currFilter = mutableStateOf(FilterType.ALL_FILTER)
 
 

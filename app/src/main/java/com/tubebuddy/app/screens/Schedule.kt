@@ -84,8 +84,10 @@ import com.tubebuddy.app.ui.components.FeedEntry
 import com.tubebuddy.app.ui.components.FilterType
 import com.tubebuddy.app.ui.components.FeedType
 import com.tubebuddy.app.ui.components.FlushEntry
+import com.tubebuddy.app.ui.components.MedEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
+import com.tubebuddy.app.ui.components._medLog
 import com.tubebuddy.app.ui.components._schedule
 import com.tubebuddy.app.ui.components.isNewDay
 import com.tubebuddy.app.ui.components.itemCheckedMap
@@ -281,8 +283,9 @@ fun ScheduleScreen() {
 
     //Medication Dropdown
     var medDDExpanded by remember { mutableStateOf(false) }
-    val medicationOptions = listOf("Advil","Tylenol","Aspirin")
-    var selectedMedication by remember { mutableStateOf("") }
+    var selectedMedication by remember { mutableStateOf<MedEntry>(object : MedEntry {
+        override val _name: String = ""
+    }) }
 
     //Other New Entry Sheet Fields
     val currentTime = Calendar.getInstance()
@@ -399,33 +402,33 @@ fun ScheduleScreen() {
             }
         }
 
+
         //remove this button, for testing only
-        /*
+
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 24.dp, end = 285.dp),
+                .padding(bottom = 24.dp, end = 225.dp),
             onClick = { clearAndPopulateWithStandardItems() },
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.tertiary
         ) {
             Text(text = "Populate", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
         }
-         */
+
 
         //remove this button, for testing new day only
-        /*
+
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 24.dp, end = 100.dp),
+                .padding(bottom = 24.dp, end = 95.dp),
             onClick = { newDayClearCompleteEntries(schedContext) },
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.tertiary
         ) {
-            Text(text = "Test New Day", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
+            Text(text = "New Day", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
         }
-         */
 
 
         //Add new Schedule Item Button
@@ -549,7 +552,7 @@ fun ScheduleScreen() {
                         ) {
                             OutlinedTextField(
                                 readOnly = true,
-                                value = selectedMedication,
+                                value = selectedMedication._name,
                                 onValueChange = {},
                                 label = {Text("Select a Medication")},
                                 trailingIcon = {ExposedDropdownMenuDefaults.TrailingIcon(expanded = medDDExpanded)},
@@ -566,10 +569,10 @@ fun ScheduleScreen() {
                                 expanded = medDDExpanded,
                                 onDismissRequest = {medDDExpanded = false}
                             ) {
-                                medicationOptions.forEach{
+                                _medLog.forEach{
                                     options->
                                     DropdownMenuItem(
-                                        text = {Text(options, color = MaterialTheme.colorScheme.surface)},
+                                        text = { Text(options._name, color = MaterialTheme.colorScheme.surface)},
                                         onClick = {
                                             selectedMedication = options
                                             medDDExpanded = false
@@ -717,11 +720,11 @@ fun ScheduleScreen() {
                             onClick = {
 
                                 if (newLogName.isEmpty()){
-                                    Toast.makeText(schedContext, "Please enter a title", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(schedContext, "Please enter a title.", Toast.LENGTH_SHORT).show()
                                     return@Button
                                 }
 
-                                if (newItemCategoriesSelectedIndex == 2 && selectedMedication.isBlank()){
+                                if (newItemCategoriesSelectedIndex == 2 && selectedMedication._name==""){
                                     Toast.makeText(schedContext, "Please select a medication.", Toast.LENGTH_SHORT).show()
                                     return@Button
                                 }
@@ -796,7 +799,7 @@ fun ScheduleScreen() {
                                             EntryUnits.mg,
                                             newNotes,
                                             MedType.ORAL,
-                                            selectedMedication
+                                            selectedMedication._name
                                         )
                                     )
                                 }
