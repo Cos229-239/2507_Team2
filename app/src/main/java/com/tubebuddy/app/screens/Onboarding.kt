@@ -13,7 +13,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -31,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.firestore
-import com.tubebuddy.app.firebase.User
 
 
 @Composable
@@ -152,12 +150,10 @@ fun OnboardingContent(user: FirebaseUser, onFinished: () -> Unit) {
                     }
                     else {
                         if(username.isNotEmpty()) {
-                            val userData = User(
-                                name = username,
-                                onBoardComplete = true
-                            )
                             user.uid.let {
-                                db.collection("users").document(it).set(userData)
+                                db.collection("users")
+                                    .document(it)
+                                    .update("name", username, "onBoardComplete", true)
                                     .addOnSuccessListener {
                                        onFinished()
                                     }

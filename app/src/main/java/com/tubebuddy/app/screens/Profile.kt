@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -14,31 +16,105 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import com.tubebuddy.app.firebase.AuthViewModel
+import com.tubebuddy.app.ui.components.Entry
+import com.tubebuddy.app.ui.components.EntryType
+import com.tubebuddy.app.ui.components.EntryUnits
+import com.tubebuddy.app.ui.components.FeedEntry
+import com.tubebuddy.app.ui.components.FeedType
+import com.tubebuddy.app.ui.components.FlushEntry
+import com.tubebuddy.app.ui.components.MedType
+import com.tubebuddy.app.ui.components.MedicationEntry
+import com.tubebuddy.app.ui.components._schedule
 import com.tubebuddy.app.ui.theme.ThemeStateHolder
+import java.time.LocalDateTime
 
+fun mapEntry(itemMap: Map<String, Any>): Entry? {
+    val typeString = itemMap["_type"] as? String ?: return null
+    return when (typeString) {
+        "FEED" -> {
+            val amount: Int = itemMap["_amount"] as? Int ?: 0
+            val entryData = FeedEntry(
+                _type = itemMap["_type"] as? EntryType ?: EntryType.FEED,
+                _complete = itemMap["_complete"] as? Boolean ?: false,
+                _repeats = itemMap["_repeats"] as? Boolean ?: false,
+                _title = itemMap["_title"] as? String ?: "",
+                _time = itemMap["_time"] as? LocalDateTime ?: LocalDateTime.now(),
+                _amount = amount.toDouble(),
+                _unit = itemMap["_unit"] as? EntryUnits ?: EntryUnits.mL,
+                _notes = itemMap["_notes"] as? String ?: "",
+                _feedType = itemMap["_feedType"] as? FeedType ?: FeedType.ORAL
+            )
+            entryData
+        }
+        "FLUSH" -> {
+            val amount: Int = itemMap["_amount"] as? Int ?: 0
+            val entryData = FlushEntry(
+                _type = itemMap["_type"] as? EntryType ?: EntryType.FLUSH,
+                _complete = itemMap["_complete"] as? Boolean ?: false,
+                _repeats = itemMap["_repeats"] as? Boolean ?: false,
+                _title = itemMap["_title"] as? String ?: "",
+                _time = itemMap["_time"] as? LocalDateTime ?: LocalDateTime.now(),
+                _amount = amount.toDouble(),
+                _unit = itemMap["_unit"] as? EntryUnits ?: EntryUnits.mL,
+                _notes = itemMap["_notes"] as? String ?: ""
+            )
+            entryData
+        }
+        "MEDICINE" -> {
+            val amount: Int? = itemMap["_amount"] as? Int ?: 0
+            val entryData = MedicationEntry(
+                _type = itemMap["_type"] as? EntryType ?: EntryType.MEDICINE,
+                _complete = itemMap["_complete"] as? Boolean ?: false,
+                _repeats = itemMap["_repeats"] as? Boolean ?: false,
+                _title = itemMap["_title"] as? String ?: "",
+                _time = itemMap["_time"] as? LocalDateTime ?: LocalDateTime.now(),
+                _amount = amount?.toDouble() ?: 0.0,
+                _unit = itemMap["_unit"] as? EntryUnits ?: EntryUnits.mL,
+                _notes = itemMap["_notes"] as? String ?: "",
+                _medType = itemMap["_medType"] as? MedType ?: MedType.ORAL,
+                _medicationName = itemMap["_medicationName"] as? String ?: ""
+            )
+            entryData
+        }
+        else -> null
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(authViewModel: AuthViewModel) {
     val db = Firebase.firestore
     val uid = FirebaseAuth.getInstance().currentUser?.uid
     val usernameState = remember { mutableStateOf<String?>(null) }
+    var username by remember { mutableStateOf("")}
     val isDarkTheme by ThemeStateHolder.isDarkTheme
+    var showBottomSheet by remember { mutableStateOf(false) }
     uid?.let {
         db.collection("users").document(it).get()
             .addOnSuccessListener { document ->
@@ -118,9 +194,6 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                             modifier = Modifier.padding(start = 16.dp, end = 16.dp,  bottom = 16.dp)
                         )
 
-                        // BEGIN
-
-
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -129,7 +202,19 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                             verticalArrangement = Arrangement.Bottom
                         ) {
                             Button(
-                                onClick = { },
+                                onClick = {
+                                    /// BEGIN SAVE ITEMS
+                                    for(item in _schedule) {
+                                        uid?.let {
+                                            db.collection("users")
+                                                .document(it)
+                                                .update("scheduleItems", FieldValue.arrayUnion(item))
+                                                    .addOnSuccessListener { document ->
+                                                        showBottomSheet = false
+                                                    }
+                                        }
+                                    }
+                                },
                                 modifier = Modifier.padding(top = 32.dp),
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.elevatedButtonColors(
@@ -137,7 +222,51 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                                     contentColor = MaterialTheme.colorScheme.tertiary
                                 )
                             ) {
-                                Text("Change User Info")
+                                Text("Save Items")
+                            }
+                            Button(
+                                onClick = {
+                                    // BEGIN LOAD ITEMS
+                                    uid?.let {
+                                        db.collection("users")
+                                            .document(it)
+                                            .get()
+                                            .addOnSuccessListener { documentSnapshot ->
+                                                if(documentSnapshot.exists()) {
+                                                    val items = documentSnapshot.get("scheduleItems") as? List<Map<String, Any>>
+                                                    if(items != null) {
+                                                        val entryList = mutableListOf<Entry>()
+                                                        for(itemMap in items) {
+                                                            val entry = mapEntry(itemMap)
+                                                            if(entry !=null) {
+                                                                entryList.add(entry)
+                                                            }
+                                                        }
+                                                        _schedule.addAll(entryList)
+                                                    }
+                                                }
+                                            }
+                                    }
+                                },
+                                modifier = Modifier.padding(top = 32.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.elevatedButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surface,
+                                    contentColor = MaterialTheme.colorScheme.tertiary
+                                )
+                            ) {
+                                Text("Load Items")
+                            }
+                            Button(
+                                onClick = { showBottomSheet = true },
+                                modifier = Modifier.padding(top = 32.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.elevatedButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surface,
+                                    contentColor = MaterialTheme.colorScheme.tertiary
+                                )
+                            ) {
+                                Text("Change Username")
                             }
 
                             Button(
@@ -151,6 +280,77 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                             ) {
                                 Text("Sign Out")
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if(showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showBottomSheet = false
+            },
+            containerColor = MaterialTheme.colorScheme.secondary
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(.6f)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Change Current Username",
+                            textAlign = TextAlign.Center,
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = username,
+                        onValueChange = { username = it },
+                        label = { Text("Username") },
+                        textStyle = TextStyle(
+                            color = MaterialTheme.colorScheme.surface
+                        ),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                            focusedTextColor = MaterialTheme.colorScheme.surface,
+                            focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.surface,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.surface
+                        ),
+                        modifier = Modifier.padding(top = 24.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Button(
+                            onClick = {
+                                uid?.let {
+                                    db.collection("users").document(it).update(mapOf("name" to username))
+                                        .addOnSuccessListener { document ->
+                                            showBottomSheet = false
+                                        }
+                                }
+                            },
+                            modifier = Modifier.padding(top = 32.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.elevatedButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.tertiary
+                            )
+                        ) {
+                            Text("Confirm")
                         }
                     }
                 }
