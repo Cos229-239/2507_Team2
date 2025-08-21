@@ -73,10 +73,12 @@ import com.tubebuddy.app.ui.components.FeedEntry
 import com.tubebuddy.app.ui.components.FeedType
 import com.tubebuddy.app.ui.components.FilterType
 import com.tubebuddy.app.ui.components.FlushEntry
+import com.tubebuddy.app.ui.components.MedEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
 import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components._entryLog
+import com.tubebuddy.app.ui.components._medLog
 import kotlinx.coroutines.launch
 import java.time.DateTimeException
 import java.time.LocalDate
@@ -184,8 +186,9 @@ fun FeedingLogScreen() {
 
     //Medication Dropdown
     var medDDExpanded by remember { mutableStateOf(false) }
-    val medicationOptions = listOf("Advil","Tylenol","Aspirin")
-    var selectedMedication by remember { mutableStateOf("") }
+    var selectedMedication by remember { mutableStateOf<MedEntry>(object : MedEntry {
+        override val _name: String = ""
+    }) }
 
     //Date Entry
     var selectedMonth by remember { mutableStateOf(MonthList.entries[LocalDate.now().monthValue - 1]) }
@@ -369,7 +372,7 @@ fun FeedingLogScreen() {
                         ) {
                             OutlinedTextField(
                                 readOnly = true,
-                                value = selectedMedication,
+                                value = selectedMedication._name,
                                 onValueChange = {},
                                 label = {Text("Select a Medication")},
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = medDDExpanded)},
@@ -386,10 +389,10 @@ fun FeedingLogScreen() {
                                 expanded = medDDExpanded,
                                 onDismissRequest = {medDDExpanded = false}
                             ) {
-                                medicationOptions.forEach{
+                                _medLog.forEach{
                                         options->
                                     DropdownMenuItem(
-                                        text = {Text(options, color = MaterialTheme.colorScheme.surface)},
+                                        text = {Text(options._name, color = MaterialTheme.colorScheme.surface)},
                                         onClick = {
                                             selectedMedication = options
                                             medDDExpanded = false
@@ -629,7 +632,7 @@ fun FeedingLogScreen() {
                                     return@Button
                                 }
 
-                                if (newItemCategoriesSelectedIndex == 2 && selectedMedication.isBlank()){
+                                if (newItemCategoriesSelectedIndex == 2 && selectedMedication._name == ""){
                                     Toast.makeText(logContext, "Please select a medication.", Toast.LENGTH_SHORT).show()
                                     return@Button
                                 }
@@ -704,7 +707,7 @@ fun FeedingLogScreen() {
                                             EntryUnits.mg,
                                             newNotes,
                                             MedType.ORAL,
-                                            selectedMedication
+                                            selectedMedication._name
                                         )
                                     )
                                 }
