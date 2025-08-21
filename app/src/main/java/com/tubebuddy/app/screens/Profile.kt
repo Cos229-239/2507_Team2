@@ -1,5 +1,6 @@
 package com.tubebuddy.app.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,18 +55,34 @@ import com.tubebuddy.app.ui.components._schedule
 import com.tubebuddy.app.ui.theme.ThemeStateHolder
 import java.time.LocalDateTime
 
+fun mapTime(timeMap: Map<String, Any>?): LocalDateTime? {
+    if(timeMap == null) { return null }
+
+    val year = (timeMap["year"] as? Number)?.toInt() ?: 0
+    val month = (timeMap["monthValue"] as? Number)?.toInt() ?: 0
+    val day = (timeMap["dayOfMonth"] as? Number)?.toInt() ?: 0
+    val hour = (timeMap["hour"] as? Number)?.toInt() ?: 0
+    val minute = (timeMap["minute"] as? Number)?.toInt() ?: 0
+    val second = (timeMap["second"] as? Number)?.toInt() ?: 0
+    Log.d("READ MEE", year.toString() + month.toString())
+
+    if(year == 0 || month == 0 || day == 0) { return null }
+    return LocalDateTime.of(year, month, day, hour, minute, second)
+}
+
 fun mapEntry(itemMap: Map<String, Any>): Entry? {
     val typeString = itemMap["_type"] as? String ?: return null
     return when (typeString) {
         "FEED" -> {
-            val amount: Int = itemMap["_amount"] as? Int ?: 0
+            val timeMap = itemMap["_time"] as? Map<String, Any>
+            val time = mapTime(timeMap) ?: LocalDateTime.now()
             val entryData = FeedEntry(
                 _type = itemMap["_type"] as? EntryType ?: EntryType.FEED,
                 _complete = itemMap["_complete"] as? Boolean ?: false,
                 _repeats = itemMap["_repeats"] as? Boolean ?: false,
                 _title = itemMap["_title"] as? String ?: "",
-                _time = itemMap["_time"] as? LocalDateTime ?: LocalDateTime.now(),
-                _amount = amount.toDouble(),
+                _time = time,
+                _amount = (itemMap["_amount"] as? Double ?: 0) as Double,
                 _unit = itemMap["_unit"] as? EntryUnits ?: EntryUnits.mL,
                 _notes = itemMap["_notes"] as? String ?: "",
                 _feedType = itemMap["_feedType"] as? FeedType ?: FeedType.ORAL
@@ -73,28 +90,30 @@ fun mapEntry(itemMap: Map<String, Any>): Entry? {
             entryData
         }
         "FLUSH" -> {
-            val amount: Int = itemMap["_amount"] as? Int ?: 0
+            val timeMap = itemMap["_time"] as? Map<String, Any>
+            val time = mapTime(timeMap) ?: LocalDateTime.now()
             val entryData = FlushEntry(
                 _type = itemMap["_type"] as? EntryType ?: EntryType.FLUSH,
                 _complete = itemMap["_complete"] as? Boolean ?: false,
                 _repeats = itemMap["_repeats"] as? Boolean ?: false,
                 _title = itemMap["_title"] as? String ?: "",
-                _time = itemMap["_time"] as? LocalDateTime ?: LocalDateTime.now(),
-                _amount = amount.toDouble(),
+                _time = time,
+                _amount = (itemMap["_amount"] as? Double ?: 0) as Double,
                 _unit = itemMap["_unit"] as? EntryUnits ?: EntryUnits.mL,
                 _notes = itemMap["_notes"] as? String ?: ""
             )
             entryData
         }
         "MEDICINE" -> {
-            val amount: Int? = itemMap["_amount"] as? Int ?: 0
+            val timeMap = itemMap["_time"] as? Map<String, Any>
+            val time = mapTime(timeMap) ?: LocalDateTime.now()
             val entryData = MedicationEntry(
                 _type = itemMap["_type"] as? EntryType ?: EntryType.MEDICINE,
                 _complete = itemMap["_complete"] as? Boolean ?: false,
                 _repeats = itemMap["_repeats"] as? Boolean ?: false,
                 _title = itemMap["_title"] as? String ?: "",
-                _time = itemMap["_time"] as? LocalDateTime ?: LocalDateTime.now(),
-                _amount = amount?.toDouble() ?: 0.0,
+                _time = time,
+                _amount = (itemMap["_amount"] as? Double ?: 0) as Double,
                 _unit = itemMap["_unit"] as? EntryUnits ?: EntryUnits.mL,
                 _notes = itemMap["_notes"] as? String ?: "",
                 _medType = itemMap["_medType"] as? MedType ?: MedType.ORAL,
