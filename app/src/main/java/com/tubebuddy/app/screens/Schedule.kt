@@ -76,6 +76,9 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Replay5
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 import com.tubebuddy.app.ui.components.Entry
 import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components.EntryType
@@ -304,6 +307,8 @@ fun ScheduleScreen() {
     //code that runs each time the schedule screen appears
     //check if its a new day to clear old (non-repeating) schedule items
     LaunchedEffect(Unit) {
+        _schedule.clear()
+        loadItemsFromFB()
         if (isNewDay(schedContext)){
             newDayClearCompleteEntries(schedContext)
         }
@@ -402,7 +407,7 @@ fun ScheduleScreen() {
             }
         }
 
-
+/*
         //remove this button, for testing only
 
         FloatingActionButton(
@@ -430,6 +435,7 @@ fun ScheduleScreen() {
             Text(text = "New Day", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
         }
 
+ */
 
         //Add new Schedule Item Button
         FloatingActionButton(
@@ -1070,4 +1076,32 @@ fun clearAndPopulateWithStandardItems(){
         _medType = MedType.ORAL,
         _medicationName = "Tylenol"
     ))
+}
+
+
+fun loadItemsFromFB(){
+
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+    val db = Firebase.firestore
+
+    uid?.let {
+        db.collection("users")
+            .document(it)
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                if(documentSnapshot.exists()) {
+                    val items = documentSnapshot.get("scheduleItems") as? List<Map<String, Any>>
+                    if(items != null) {
+                        val entryList = mutableListOf<Entry>()
+                        for(itemMap in items) {
+                            val entry = mapEntry(itemMap)
+                            if(entry !=null) {
+                                entryList.add(entry)
+                            }
+                        }
+                        _schedule.addAll(entryList)
+                    }
+                }
+            }
+    }
 }
