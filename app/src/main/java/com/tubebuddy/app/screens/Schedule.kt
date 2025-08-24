@@ -94,6 +94,7 @@ import com.tubebuddy.app.ui.components._medLog
 import com.tubebuddy.app.ui.components._schedule
 import com.tubebuddy.app.ui.components.isNewDay
 import com.tubebuddy.app.ui.components.itemCheckedMap
+import com.tubebuddy.app.ui.components.pushScheduleItemToFirestore
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -307,8 +308,10 @@ fun ScheduleScreen() {
     //code that runs each time the schedule screen appears
     //check if its a new day to clear old (non-repeating) schedule items
     LaunchedEffect(Unit) {
-        _schedule.clear()
-        loadItemsFromFB()
+        if (_schedule.isEmpty()) {
+            _schedule.clear()
+            loadItemsFromFB()
+        }
         if (isNewDay(schedContext)){
             newDayClearCompleteEntries(schedContext)
         }
@@ -970,6 +973,8 @@ fun insertScheduleEntry(entry: Entry){
     else{
         _schedule.add(insertIndex, entry)
     }
+
+    pushScheduleItemToFirestore(entry)
 }
 
 fun scheduleFormatShortTime(dateTime: LocalDateTime): String {
@@ -1099,7 +1104,10 @@ fun loadItemsFromFB(){
                                 entryList.add(entry)
                             }
                         }
-                        _schedule.addAll(entryList)
+
+                        for (newItem in entryList){
+                            insertScheduleEntry(newItem)
+                        }
                     }
                 }
             }

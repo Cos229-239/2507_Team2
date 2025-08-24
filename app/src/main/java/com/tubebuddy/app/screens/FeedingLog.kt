@@ -66,6 +66,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.firestore
 import com.tubebuddy.app.ui.components.Entry
 import com.tubebuddy.app.ui.components.EntryType
 import com.tubebuddy.app.ui.components.EntryUnits
@@ -79,6 +83,7 @@ import com.tubebuddy.app.ui.components.MedicationEntry
 import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components._entryLog
 import com.tubebuddy.app.ui.components._medLog
+import com.tubebuddy.app.ui.components._schedule
 import kotlinx.coroutines.launch
 import java.time.DateTimeException
 import java.time.LocalDate
