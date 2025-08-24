@@ -46,8 +46,7 @@ fun HomeScreen() {
 
     LaunchedEffect(Unit) {
 
-        if (_schedule.isEmpty()) {
-            _schedule.clear()
+        if (_schedule.isEmpty() && _entryLog.isEmpty()) {
             loadItemsFromFB()
         }
         if (isNewDay(homeContext)){

@@ -53,6 +53,7 @@ import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,6 +85,8 @@ import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components._entryLog
 import com.tubebuddy.app.ui.components._medLog
 import com.tubebuddy.app.ui.components._schedule
+import com.tubebuddy.app.ui.components.isNewDay
+import com.tubebuddy.app.ui.components.pushLogItemToFirestore
 import kotlinx.coroutines.launch
 import java.time.DateTimeException
 import java.time.LocalDate
@@ -214,6 +217,12 @@ fun FeedingLogScreen() {
         initialMinute = currentTime.get(Calendar.MINUTE),
         is24Hour = false,
     )
+
+    LaunchedEffect(Unit) {
+        if (_schedule.isEmpty() && _entryLog.isEmpty()) {
+            loadItemsFromFB()
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -654,7 +663,7 @@ fun FeedingLogScreen() {
                                         FeedType.ORAL
                                     }
 
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         FeedEntry(
                                             EntryType.FEED,
                                             false,
@@ -675,7 +684,7 @@ fun FeedingLogScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 1) {
                                     //flush
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         FlushEntry(
                                             EntryType.FLUSH,
                                             false,
@@ -695,7 +704,7 @@ fun FeedingLogScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 2) {
                                     //medication
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         MedicationEntry(
                                             EntryType.MEDICINE,
                                             false,
@@ -782,6 +791,20 @@ fun insertEntry(entry: Entry){
     else{
         _entryLog.add(insertIndex, entry)
     }
+}
+
+fun insertEntryAndFB(entry: Entry){
+    //find index to insert
+    val insertIndex = _entryLog.indexOfFirst { it._time.isAfter(entry._time) }
+
+    if (insertIndex < 0){
+        _entryLog.add(entry)
+    }
+    else{
+        _entryLog.add(insertIndex, entry)
+    }
+
+    pushLogItemToFirestore(entry)
 }
 
 //Generate Log Buddy Cards

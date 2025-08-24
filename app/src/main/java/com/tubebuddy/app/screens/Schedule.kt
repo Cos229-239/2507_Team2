@@ -90,10 +90,12 @@ import com.tubebuddy.app.ui.components.FlushEntry
 import com.tubebuddy.app.ui.components.MedEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
+import com.tubebuddy.app.ui.components._entryLog
 import com.tubebuddy.app.ui.components._medLog
 import com.tubebuddy.app.ui.components._schedule
 import com.tubebuddy.app.ui.components.isNewDay
 import com.tubebuddy.app.ui.components.itemCheckedMap
+import com.tubebuddy.app.ui.components.loadLogItemsFromFB
 import com.tubebuddy.app.ui.components.pushScheduleItemToFirestore
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -308,8 +310,7 @@ fun ScheduleScreen() {
     //code that runs each time the schedule screen appears
     //check if its a new day to clear old (non-repeating) schedule items
     LaunchedEffect(Unit) {
-        if (_schedule.isEmpty()) {
-            _schedule.clear()
+        if (_schedule.isEmpty() && _entryLog.isEmpty()) {
             loadItemsFromFB()
         }
         if (isNewDay(schedContext)){
@@ -361,7 +362,7 @@ fun ScheduleScreen() {
 
                             if (isNowChecked) {
                                 if (scheduledItem is FeedEntry)
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         FeedEntry(
                                             scheduledItem._type,
                                             _complete = true,
@@ -375,7 +376,7 @@ fun ScheduleScreen() {
                                         )
                                     )
                                 if (scheduledItem is FlushEntry)
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         FlushEntry(
                                             scheduledItem._type,
                                             _complete = true,
@@ -388,7 +389,7 @@ fun ScheduleScreen() {
                                         )
                                     )
                                 if (scheduledItem is MedicationEntry)
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         MedicationEntry(
                                             scheduledItem._type,
                                             _complete = true,
@@ -750,7 +751,7 @@ fun ScheduleScreen() {
                                         FeedType.ORAL
                                     }
 
-                                    insertScheduleEntry(
+                                    insertScheduleEntryAndFB(
                                         FeedEntry(
                                             EntryType.FEED,
                                             false,
@@ -771,7 +772,7 @@ fun ScheduleScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 1) {
                                     //flush
-                                    insertScheduleEntry(
+                                    insertScheduleEntryAndFB(
                                         FlushEntry(
                                             EntryType.FLUSH,
                                             false,
@@ -791,7 +792,7 @@ fun ScheduleScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 2) {
                                     //medication
-                                    insertScheduleEntry(
+                                    insertScheduleEntryAndFB(
                                         MedicationEntry(
                                             EntryType.MEDICINE,
                                             false,
@@ -973,6 +974,18 @@ fun insertScheduleEntry(entry: Entry){
     else{
         _schedule.add(insertIndex, entry)
     }
+}
+
+fun insertScheduleEntryAndFB(entry: Entry){
+    //find index to insert
+    val insertIndex = _schedule.indexOfFirst { it._time.isAfter(entry._time) }
+
+    if (insertIndex < 0){
+        _schedule.add(entry)
+    }
+    else{
+        _schedule.add(insertIndex, entry)
+    }
 
     pushScheduleItemToFirestore(entry)
 }
@@ -1085,6 +1098,10 @@ fun clearAndPopulateWithStandardItems(){
 
 
 fun loadItemsFromFB(){
+
+    _entryLog.clear()
+    _schedule.clear()
+    loadLogItemsFromFB()
 
     val uid = FirebaseAuth.getInstance().currentUser?.uid
     val db = Firebase.firestore

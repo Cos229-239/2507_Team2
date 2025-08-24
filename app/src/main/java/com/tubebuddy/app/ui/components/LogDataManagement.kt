@@ -4,6 +4,9 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
+import com.tubebuddy.app.screens.insertEntry
+import com.tubebuddy.app.screens.insertScheduleEntry
+import com.tubebuddy.app.screens.mapEntry
 import java.time.LocalDateTime
 
 fun LocalDateTime.toFirestoreTimeMap(): Map<String, Int> = mapOf(
@@ -60,4 +63,49 @@ fun pushScheduleItemToFirestore(schedItem: Entry) {
                 .document(uid)
                 .set(mapOf("scheduleItems" to listOf(itemMap)), com.google.firebase.firestore.SetOptions.merge())
         }
+}
+
+fun pushLogItemToFirestore(schedItem: Entry) {
+    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val db = Firebase.firestore
+    val itemMap = entryToFirestoreMap(schedItem)
+
+    db.collection("users")
+        .document(uid)
+        .update("logItems", FieldValue.arrayUnion(itemMap))
+        .addOnFailureListener {
+            db.collection("users")
+                .document(uid)
+                .set(mapOf("logItems" to listOf(itemMap)), com.google.firebase.firestore.SetOptions.merge())
+        }
+}
+
+fun loadLogItemsFromFB(){
+
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+    val db = Firebase.firestore
+
+    uid?.let {
+        db.collection("users")
+            .document(it)
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                if(documentSnapshot.exists()) {
+                    val items = documentSnapshot.get("logItems") as? List<Map<String, Any>>
+                    if(items != null) {
+                        val entryList = mutableListOf<Entry>()
+                        for(itemMap in items) {
+                            val entry = mapEntry(itemMap)
+                            if(entry !=null) {
+                                entryList.add(entry)
+                            }
+                        }
+
+                        for (newItem in entryList){
+                            insertEntry(newItem)
+                        }
+                    }
+                }
+            }
+    }
 }
