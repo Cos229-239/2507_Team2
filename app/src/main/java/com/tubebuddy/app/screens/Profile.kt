@@ -25,6 +25,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,6 +53,7 @@ import com.tubebuddy.app.ui.components.FlushEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
 import com.tubebuddy.app.ui.components._schedule
+import androidx.compose.foundation.clickable
 import com.tubebuddy.app.ui.theme.ThemeStateHolder
 import java.time.LocalDateTime
 
@@ -133,7 +135,8 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
     val usernameState = remember { mutableStateOf<String?>(null) }
     var username by remember { mutableStateOf("")}
     val isDarkTheme by ThemeStateHolder.isDarkTheme
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var showFAQSheet by remember { mutableStateOf(false) }
+    var showUsernameSheet by remember { mutableStateOf(false) }
     uid?.let {
         db.collection("users").document(it).get()
             .addOnSuccessListener { document ->
@@ -213,6 +216,47 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                             modifier = Modifier.padding(start = 16.dp, end = 16.dp,  bottom = 16.dp)
                         )
 
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "View FAQs",
+                                fontSize = 16.sp,
+                                modifier = Modifier
+                                    .padding(start = 16.dp, bottom = 8.dp)
+                                    .clickable {
+                                        showFAQSheet = true
+                                    },
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+
+                        }
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.surface,
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp,  bottom = 16.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Change Username",
+                                fontSize = 16.sp,
+                                modifier = Modifier
+                                    .padding(start = 16.dp)
+                                    .clickable {
+                                        showUsernameSheet = true
+                                    },
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+
+                        }
+
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -220,73 +264,73 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Bottom
                         ) {
-                            Button(
-                                onClick = {
-                                    /// BEGIN SAVE ITEMS
-                                    for(item in _schedule) {
-                                        uid?.let {
-                                            db.collection("users")
-                                                .document(it)
-                                                .update("scheduleItems", FieldValue.arrayUnion(item))
-                                                    .addOnSuccessListener { document ->
-                                                        showBottomSheet = false
-                                                    }
-                                        }
-                                    }
-                                },
-                                modifier = Modifier.padding(top = 32.dp),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.elevatedButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.surface,
-                                    contentColor = MaterialTheme.colorScheme.tertiary
-                                )
-                            ) {
-                                Text("Save Items")
-                            }
-                            Button(
-                                onClick = {
-                                    // BEGIN LOAD ITEMS
-                                    uid?.let {
-                                        db.collection("users")
-                                            .document(it)
-                                            .get()
-                                            .addOnSuccessListener { documentSnapshot ->
-                                                if(documentSnapshot.exists()) {
-                                                    val items = documentSnapshot.get("scheduleItems") as? List<Map<String, Any>>
-                                                    if(items != null) {
-                                                        val entryList = mutableListOf<Entry>()
-                                                        for(itemMap in items) {
-                                                            val entry = mapEntry(itemMap)
-                                                            if(entry !=null) {
-                                                                entryList.add(entry)
-                                                            }
-                                                        }
-                                                        _schedule.addAll(entryList)
-                                                    }
-                                                }
-                                            }
-                                    }
-                                },
-                                modifier = Modifier.padding(top = 32.dp),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.elevatedButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.surface,
-                                    contentColor = MaterialTheme.colorScheme.tertiary
-                                )
-                            ) {
-                                Text("Load Items")
-                            }
-                            Button(
-                                onClick = { showBottomSheet = true },
-                                modifier = Modifier.padding(top = 32.dp),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.elevatedButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.surface,
-                                    contentColor = MaterialTheme.colorScheme.tertiary
-                                )
-                            ) {
-                                Text("Change Username")
-                            }
+//                            Button(
+//                                onClick = {
+//                                    /// BEGIN SAVE ITEMS
+//                                    for(item in _schedule) {
+//                                        uid?.let {
+//                                            db.collection("users")
+//                                                .document(it)
+//                                                .update("scheduleItems", FieldValue.arrayUnion(item))
+//                                                    .addOnSuccessListener { document ->
+//                                                        showBottomSheet = false
+//                                                    }
+//                                        }
+//                                    }
+//                                },
+//                                modifier = Modifier.padding(top = 32.dp),
+//                                shape = RoundedCornerShape(8.dp),
+//                                colors = ButtonDefaults.elevatedButtonColors(
+//                                    containerColor = MaterialTheme.colorScheme.surface,
+//                                    contentColor = MaterialTheme.colorScheme.tertiary
+//                                )
+//                            ) {
+//                                Text("Save Items")
+//                            }
+//                            Button(
+//                                onClick = {
+//                                    // BEGIN LOAD ITEMS
+//                                    uid?.let {
+//                                        db.collection("users")
+//                                            .document(it)
+//                                            .get()
+//                                            .addOnSuccessListener { documentSnapshot ->
+//                                                if(documentSnapshot.exists()) {
+//                                                    val items = documentSnapshot.get("scheduleItems") as? List<Map<String, Any>>
+//                                                    if(items != null) {
+//                                                        val entryList = mutableListOf<Entry>()
+//                                                        for(itemMap in items) {
+//                                                            val entry = mapEntry(itemMap)
+//                                                            if(entry !=null) {
+//                                                                entryList.add(entry)
+//                                                            }
+//                                                        }
+//                                                        _schedule.addAll(entryList)
+//                                                    }
+//                                                }
+//                                            }
+//                                    }
+//                                },
+//                                modifier = Modifier.padding(top = 32.dp),
+//                                shape = RoundedCornerShape(8.dp),
+//                                colors = ButtonDefaults.elevatedButtonColors(
+//                                    containerColor = MaterialTheme.colorScheme.surface,
+//                                    contentColor = MaterialTheme.colorScheme.tertiary
+//                                )
+//                            ) {
+//                                Text("Load Items")
+//                            }
+//                            Button(
+//                                onClick = { showBottomSheet = true },
+//                                modifier = Modifier.padding(top = 32.dp),
+//                                shape = RoundedCornerShape(8.dp),
+//                                colors = ButtonDefaults.elevatedButtonColors(
+//                                    containerColor = MaterialTheme.colorScheme.surface,
+//                                    contentColor = MaterialTheme.colorScheme.tertiary
+//                                )
+//                            ) {
+//                                Text("Change Username")
+//                            }
 
                             Button(
                                 onClick = { authViewModel.signOut() },
@@ -305,10 +349,71 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
             }
         }
     }
-    if(showBottomSheet) {
+
+
+    if(showFAQSheet) {
         ModalBottomSheet(
             onDismissRequest = {
-                showBottomSheet = false
+                showFAQSheet = false
+            },
+            containerColor = MaterialTheme.colorScheme.secondary
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(.6f)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "FAQs",
+                            textAlign = TextAlign.Center,
+                            fontSize = 26.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.padding(16.dp)
+                    )
+
+
+                    // ANJELLYY FAQssss GOO here
+
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Button(
+                            onClick = {
+                                showFAQSheet = false
+                            },
+                            modifier = Modifier.padding(top = 32.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.elevatedButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.tertiary
+                            )
+                        ) {
+                            Text("Done")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    if(showUsernameSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showUsernameSheet = false
             },
             containerColor = MaterialTheme.colorScheme.secondary
         ) {
@@ -327,11 +432,14 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                             text = "Change Current Username",
                             textAlign = TextAlign.Center,
                             fontSize = 26.sp,
-                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
-                    Spacer(Modifier.height(16.dp))
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.padding(16.dp)
+                    )
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
@@ -358,7 +466,7 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
                                 uid?.let {
                                     db.collection("users").document(it).update(mapOf("name" to username))
                                         .addOnSuccessListener { document ->
-                                            showBottomSheet = false
+                                            showUsernameSheet = false
                                         }
                                 }
                             },
