@@ -93,6 +93,8 @@ import com.tubebuddy.app.ui.components.MedicationEntry
 import com.tubebuddy.app.ui.components._entryLog
 import com.tubebuddy.app.ui.components._medLog
 import com.tubebuddy.app.ui.components._schedule
+import com.tubebuddy.app.ui.components.deleteLogItemFB
+import com.tubebuddy.app.ui.components.deleteScheduleItemFB
 import com.tubebuddy.app.ui.components.isNewDay
 import com.tubebuddy.app.ui.components.itemCheckedMap
 import com.tubebuddy.app.ui.components.loadLogItemsFromFB
@@ -462,6 +464,7 @@ fun ScheduleScreen() {
             ) {
                 EntryDetailSheet(tappedCard!!,
                     onDelete = {
+                        tappedCard?.let { deleteScheduleItemFB(it) }
                         _schedule.remove(tappedCard)
                         tappedCard = null
                     },

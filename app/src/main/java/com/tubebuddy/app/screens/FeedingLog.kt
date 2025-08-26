@@ -85,6 +85,7 @@ import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components._entryLog
 import com.tubebuddy.app.ui.components._medLog
 import com.tubebuddy.app.ui.components._schedule
+import com.tubebuddy.app.ui.components.deleteLogItemFB
 import com.tubebuddy.app.ui.components.isNewDay
 import com.tubebuddy.app.ui.components.pushLogItemToFirestore
 import kotlinx.coroutines.launch
@@ -289,6 +290,7 @@ fun FeedingLogScreen() {
                 LogEntryDetailSheet(
                     logTappedCard!!,
                     onDelete = {
+                        logTappedCard?.let { deleteLogItemFB(it) }
                         _entryLog.remove(logTappedCard)
                         logTappedCard = null
                     },

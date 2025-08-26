@@ -109,3 +109,23 @@ fun loadLogItemsFromFB(){
             }
     }
 }
+
+fun deleteScheduleItemFB(item: Entry) {
+    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val db = Firebase.firestore
+    val itemMap = entryToFirestoreMap(item)
+
+    db.collection("users")
+        .document(uid)
+        .update("scheduleItems", FieldValue.arrayRemove(itemMap))
+}
+
+fun deleteLogItemFB(item: Entry) {
+    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val db = Firebase.firestore
+    val itemMap = entryToFirestoreMap(item)
+
+    db.collection("users")
+        .document(uid)
+        .update("logItems", FieldValue.arrayRemove(itemMap))
+}
