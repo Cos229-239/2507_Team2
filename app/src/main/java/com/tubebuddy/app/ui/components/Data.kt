@@ -38,6 +38,7 @@ interface Entry{
     val _amount: Double
     val _unit: EntryUnits
     val _notes: String
+    var _checked: Boolean
 }
 
 data class FeedEntry(
@@ -49,7 +50,8 @@ data class FeedEntry(
     override val _amount: Double,
     override val _unit: EntryUnits,
     override val _notes: String,
-    val _feedType: FeedType
+    val _feedType: FeedType,
+    override var _checked: Boolean = false
 ) : Entry
 
 data class FlushEntry(
@@ -61,6 +63,7 @@ data class FlushEntry(
     override val _amount: Double,
     override val _unit: EntryUnits,
     override val _notes: String,
+    override var _checked: Boolean = false
 ) : Entry
 
 data class MedicationEntry(
@@ -73,7 +76,8 @@ data class MedicationEntry(
     override val _unit: EntryUnits,
     override val _notes: String,
     val _medType: MedType,
-    val _medicationName: String
+    val _medicationName: String,
+    override var _checked: Boolean = false
 ) : Entry
 
 interface MedEntry{

@@ -18,7 +18,7 @@ fun LocalDateTime.toFirestoreTimeMap(): Map<String, Int> = mapOf(
     "second" to second
 )
 
-private fun entryToFirestoreMap(currEntry: Entry): Map<String, Any?> {
+fun entryToFirestoreMap(currEntry: Entry): Map<String, Any?> {
     val base = mutableMapOf<String, Any?>(
         "_kind" to when (currEntry) {
             is FeedEntry -> "FEED"
@@ -33,7 +33,8 @@ private fun entryToFirestoreMap(currEntry: Entry): Map<String, Any?> {
         "_time" to currEntry._time.toFirestoreTimeMap(),
         "_amount" to currEntry._amount,
         "_unit" to currEntry._unit.toString(),
-        "_notes" to currEntry._notes
+        "_notes" to currEntry._notes,
+        "_checked" to currEntry._checked
     )
 
     when (currEntry) {
@@ -44,11 +45,12 @@ private fun entryToFirestoreMap(currEntry: Entry): Map<String, Any?> {
             base["_medType"] = currEntry._medType.toString()
             base["_medicationName"] = currEntry._medicationName
         }
-        is FlushEntry -> {  }
+        is FlushEntry -> { /* no extra fields */ }
     }
 
     return base
 }
+
 
 fun pushScheduleItemToFirestore(schedItem: Entry) {
     val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -128,4 +130,16 @@ fun deleteLogItemFB(item: Entry) {
     db.collection("users")
         .document(uid)
         .update("logItems", FieldValue.arrayRemove(itemMap))
+}
+
+fun refreshItemCheckedMapFromSchedule() {
+    itemCheckedMap.clear()
+    _schedule.forEach { entry ->
+        itemCheckedMap[entry] = entry._checked
+    }
+}
+
+fun setChecked(entry: Entry, checked: Boolean) {
+    entry._checked = checked
+    itemCheckedMap[entry] = checked
 }

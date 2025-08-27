@@ -72,54 +72,58 @@ fun mapTime(timeMap: Map<String, Any>?): LocalDateTime? {
 
 fun mapEntry(itemMap: Map<String, Any>): Entry? {
     val typeString = itemMap["_type"] as? String ?: return null
+
     return when (typeString) {
         "FEED" -> {
             val timeMap = itemMap["_time"] as? Map<String, Any>
             val time = mapTime(timeMap) ?: LocalDateTime.now()
-            val entryData = FeedEntry(
-                _type = itemMap["_type"] as? EntryType ?: EntryType.FEED,
+
+            FeedEntry(
+                _type = EntryType.FEED,
                 _complete = itemMap["_complete"] as? Boolean ?: false,
                 _repeats = itemMap["_repeats"] as? Boolean ?: false,
                 _title = itemMap["_title"] as? String ?: "",
                 _time = time,
-                _amount = (itemMap["_amount"] as? Double ?: 0) as Double,
-                _unit = itemMap["_unit"] as? EntryUnits ?: EntryUnits.mL,
+                _amount = (itemMap["_amount"] as? Number ?: 0.0).toDouble(),
+                _unit = (itemMap["_unit"] as? String)?.let { EntryUnits.valueOf(it) } ?: EntryUnits.mL,
                 _notes = itemMap["_notes"] as? String ?: "",
-                _feedType = itemMap["_feedType"] as? FeedType ?: FeedType.ORAL
+                _feedType = (itemMap["_feedType"] as? String)?.let { FeedType.valueOf(it) } ?: FeedType.ORAL,
+                _checked = itemMap["_checked"] as? Boolean ?: false
             )
-            entryData
         }
         "FLUSH" -> {
             val timeMap = itemMap["_time"] as? Map<String, Any>
             val time = mapTime(timeMap) ?: LocalDateTime.now()
-            val entryData = FlushEntry(
-                _type = itemMap["_type"] as? EntryType ?: EntryType.FLUSH,
+
+            FlushEntry(
+                _type = EntryType.FLUSH,
                 _complete = itemMap["_complete"] as? Boolean ?: false,
                 _repeats = itemMap["_repeats"] as? Boolean ?: false,
                 _title = itemMap["_title"] as? String ?: "",
                 _time = time,
-                _amount = (itemMap["_amount"] as? Double ?: 0) as Double,
-                _unit = itemMap["_unit"] as? EntryUnits ?: EntryUnits.mL,
-                _notes = itemMap["_notes"] as? String ?: ""
+                _amount = (itemMap["_amount"] as? Number ?: 0.0).toDouble(),
+                _unit = (itemMap["_unit"] as? String)?.let { EntryUnits.valueOf(it) } ?: EntryUnits.mL,
+                _notes = itemMap["_notes"] as? String ?: "",
+                _checked = itemMap["_checked"] as? Boolean ?: false
             )
-            entryData
         }
         "MEDICINE" -> {
             val timeMap = itemMap["_time"] as? Map<String, Any>
             val time = mapTime(timeMap) ?: LocalDateTime.now()
-            val entryData = MedicationEntry(
-                _type = itemMap["_type"] as? EntryType ?: EntryType.MEDICINE,
+
+            MedicationEntry(
+                _type = EntryType.MEDICINE,
                 _complete = itemMap["_complete"] as? Boolean ?: false,
                 _repeats = itemMap["_repeats"] as? Boolean ?: false,
                 _title = itemMap["_title"] as? String ?: "",
                 _time = time,
-                _amount = (itemMap["_amount"] as? Double ?: 0) as Double,
-                _unit = itemMap["_unit"] as? EntryUnits ?: EntryUnits.mL,
+                _amount = (itemMap["_amount"] as? Number ?: 0.0).toDouble(),
+                _unit = (itemMap["_unit"] as? String)?.let { EntryUnits.valueOf(it) } ?: EntryUnits.mg,
                 _notes = itemMap["_notes"] as? String ?: "",
-                _medType = itemMap["_medType"] as? MedType ?: MedType.ORAL,
-                _medicationName = itemMap["_medicationName"] as? String ?: ""
+                _medType = (itemMap["_medType"] as? String)?.let { MedType.valueOf(it) } ?: MedType.ORAL,
+                _medicationName = itemMap["_medicationName"] as? String ?: "",
+                _checked = itemMap["_checked"] as? Boolean ?: false
             )
-            entryData
         }
         else -> null
     }
