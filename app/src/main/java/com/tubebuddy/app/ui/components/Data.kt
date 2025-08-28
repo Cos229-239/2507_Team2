@@ -87,18 +87,125 @@ interface MedEntry{
 val _schedule = mutableStateListOf<Entry>()
 val _entryLog = mutableStateListOf<Entry>()
 val _medLog = mutableStateListOf<MedEntry>(
-    //todo: remove prepopulated items
     object : MedEntry{
         override val _name: String
-            get() = "Advil"
+            get() = "Acetaminophen"
     },
     object : MedEntry{
         override val _name: String
-            get() = "Aspirin"
+            get() = "Amiodarone"
     },
     object : MedEntry{
         override val _name: String
-            get() = "Allegra"
+            get() = "Amoxicillin"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Atorvastatin"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Azithromycin"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Carbamazepine"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Ciprofloxacin"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Clarithromycin"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Dexamethasone"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Digoxin"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Dolutegravir"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Furosemide"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Hydromorphone"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Ibuprofen"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Lansoprazole"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Levetiracetam"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Levofloxacin"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Levodopa"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Levothyroxine"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Metronidazole"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Morphine"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Omeprazole"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Oxycodone"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Pantoprazole"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Phenytoin"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Prednisone"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Psyllium"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Simvastatin"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Valproic Acid"
+    },
+    object : MedEntry{
+        override val _name: String
+            get() = "Warfarin"
     }
 )
 var _currFilter = mutableStateOf(FilterType.ALL_FILTER)

@@ -75,6 +75,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import com.tubebuddy.app.ui.components.Entry
 import com.tubebuddy.app.ui.components._currFilter
@@ -436,7 +437,7 @@ fun ScheduleScreen() {
             }
         }
 
-
+/*
         //remove this button, for testing only
 
         FloatingActionButton(
@@ -464,7 +465,7 @@ fun ScheduleScreen() {
             Text(text = "New Day", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
         }
 
-
+ */
 
         //Add new Schedule Item Button
         FloatingActionButton(
@@ -1028,9 +1029,27 @@ fun scheduleFormatShortTime(dateTime: LocalDateTime): String {
 
 fun newDayClearCompleteEntries(context: Context) {
     val toRemove = _schedule.filter { it._checked && !it._repeats }
-    _schedule.removeAll(toRemove)
-    _schedule.filter { it._repeats }.forEach { it._checked = false }
+    if (toRemove.isNotEmpty()) {
+        _schedule.removeAll(toRemove)
+    }
+    _schedule.filter { it._repeats && it._checked }.forEach { it._checked = false }
+
     refreshItemCheckedMapFromSchedule()
+
+    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val db = FirebaseFirestore.getInstance()
+
+    val mapped = _schedule.map { entryToFirestoreMap(it) }
+
+    // update or merge if cant
+    db.collection("users")
+        .document(uid)
+        .update("scheduleItems", mapped)
+        .addOnFailureListener {
+            db.collection("users")
+                .document(uid)
+                .set(mapOf("scheduleItems" to mapped), SetOptions.merge())
+        }
 }
 
 fun clearAndPopulateWithStandardItems(){
