@@ -86,7 +86,7 @@ interface MedEntry{
 
 val _schedule = mutableStateListOf<Entry>()
 val _entryLog = mutableStateListOf<Entry>()
-val _medLog = mutableStateListOf<MedEntry>(
+val _medLog = mutableStateListOf<MedEntry>( //includes top tube administered medications
     object : MedEntry{
         override val _name: String
             get() = "Acetaminophen"

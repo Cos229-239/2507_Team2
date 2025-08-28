@@ -94,11 +94,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
 
+//for date selector
 enum class MonthList{
     Jan, Feb, Mar, April, May, June, July, Aug, Sep, Oct, Nov, Dec
 }
 
-//Schedule Detail Sheet
+//Schedule Detail Sheet - this sheet shows when a card is tapped in the log
 @Composable
 fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
     Box(
@@ -147,11 +148,9 @@ fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
             if (entry is MedicationEntry) {
                 Text("Medication: (" + "${entry._medType}" + ") ${entry._medicationName}", color = MaterialTheme.colorScheme.onPrimary)
-                //Text("Med Type: ${entry._medType}", color = Color.Black)
             }
 
             Spacer(modifier = Modifier.height(10.dp))
-
         }
 
         Button(
@@ -171,7 +170,6 @@ fun LogEntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -213,12 +211,14 @@ fun FeedingLogScreen() {
     var amountSliderValue by remember { mutableStateOf(50.0f) }
     var medAmountSliderValue by remember { mutableStateOf(5.0f) }
 
+    //time picker for new item
     val timePickerState = rememberTimePickerState(
         initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
         initialMinute = currentTime.get(Calendar.MINUTE),
         is24Hour = false,
     )
 
+    //run on launch
     LaunchedEffect(Unit) {
         if (_schedule.isEmpty() && _entryLog.isEmpty()) {
             loadItemsFromFB()
@@ -290,6 +290,7 @@ fun FeedingLogScreen() {
                 LogEntryDetailSheet(
                     logTappedCard!!,
                     onDelete = {
+                        //delete from local list and firebase
                         logTappedCard?.let { deleteLogItemFB(it) }
                         _entryLog.remove(logTappedCard)
                         logTappedCard = null
@@ -318,7 +319,7 @@ fun FeedingLogScreen() {
                         .padding(bottom = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    //-----------Title
+                    //-----------Title--------------------
                     Text(
                         text = "New Log Entry",
                         fontSize = 24.sp,
@@ -327,7 +328,7 @@ fun FeedingLogScreen() {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    //-----------Entry Category Segmented Button
+                    //-----------Entry Category Segmented Button-----------
                     SingleChoiceSegmentedButtonRow(
                         modifier = Modifier
                             .fillMaxWidth(.9f)
@@ -560,7 +561,7 @@ fun FeedingLogScreen() {
                     }
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    //-----------Time Selector
+                    //-----------Time Selector--------------------
                     TimeInput(
                         state = timePickerState,
                         colors = TimePickerDefaults.colors(
@@ -576,7 +577,7 @@ fun FeedingLogScreen() {
                     )
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    //-----------Repeat Button
+                    //-----------Repeat Button--------------------
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -629,7 +630,7 @@ fun FeedingLogScreen() {
                     )
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    //-----------Add Item Button
+                    //-----------Add Item Button--------------------
                     Row (
                         modifier = Modifier
                             .fillMaxWidth()
@@ -738,7 +739,8 @@ fun FeedingLogScreen() {
                                 containerColor = MaterialTheme.colorScheme.tertiary,
                                 contentColor = Color.White,
                             ),
-                            modifier = Modifier.weight(0.75f)
+                            modifier = Modifier
+                                .weight(0.75f)
                                 .padding(start = 16.dp)
                                 .height(50.dp)
                                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)),
@@ -751,7 +753,7 @@ fun FeedingLogScreen() {
                             Text("  Add To Log")
                         }
 
-                        //-----------Cancel Button
+                        //-----------Cancel Button--------------------
                         Button(
                             onClick = {
                                 scope.launch { sheetState.hide() }.invokeOnCompletion {
@@ -763,7 +765,8 @@ fun FeedingLogScreen() {
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 contentColor = Color.White,
                             ),
-                            modifier = Modifier.weight(0.25f)
+                            modifier = Modifier
+                                .weight(0.25f)
                                 .padding(start = 16.dp, end = 16.dp)
                                 .height(50.dp)
                                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)),
@@ -773,7 +776,6 @@ fun FeedingLogScreen() {
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "Cancel"
                             )
-                            //Text("Cancel")
                         }
                     }
                 }
@@ -783,6 +785,8 @@ fun FeedingLogScreen() {
     }
 }
 
+//Inserts entry in order of date so that items are stored in chronological order
+//and easily loaded accordingly
 fun insertEntry(entry: Entry){
     //find index to insert
     val insertIndex = _entryLog.indexOfFirst { it._time.isAfter(entry._time) }
@@ -795,6 +799,8 @@ fun insertEntry(entry: Entry){
     }
 }
 
+//Inserts entry in order of date so that items are stored in chronological order
+//and easily loaded accordingly; also adds to FB
 fun insertEntryAndFB(entry: Entry){
     //find index to insert
     val insertIndex = _entryLog.indexOfFirst { it._time.isAfter(entry._time) }
