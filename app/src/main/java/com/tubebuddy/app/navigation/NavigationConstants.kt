@@ -9,7 +9,7 @@ import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val title: String) {
-    object Home : Screen("home_screen", "Welcome, [Username]")
+    object Home : Screen("home_screen", "Welcome")
     object Schedule : Screen("schedule_screen", "Schedule")
     object FeedingLog : Screen("feedingLog_screen", "Feeding Log")
     object Medication : Screen("medication_screen", "Medications")

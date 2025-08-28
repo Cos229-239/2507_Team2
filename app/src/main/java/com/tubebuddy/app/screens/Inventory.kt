@@ -188,6 +188,7 @@ fun InventoryScreen() {
                 onDismissRequest = { itemPendingDelete = null },
                 title = { Text("Delete item?") },
                 titleContentColor = MaterialTheme.colorScheme.onBackground,
+                containerColor = MaterialTheme.colorScheme.secondary,
                 text = { Text("This will remove \"${toDelete.name}\" from your inventory.") },
                 confirmButton = {
                     TextButton(onClick = {
@@ -205,7 +206,11 @@ fun InventoryScreen() {
                 dismissButton = {
                     TextButton(onClick = {
                         itemPendingDelete = null
-                    }) { Text("Cancel") }
+                    }) {
+                        Text(
+                            text = "Cancel",
+                            color = MaterialTheme.colorScheme.onBackground)
+                    }
                 }
             )
         }
