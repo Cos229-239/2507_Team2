@@ -152,22 +152,22 @@ fun HomeScreen() {
                             color = MaterialTheme.colorScheme.onBackground)
 
                         // Inline Inventory Alert
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "Inventory Low",
-                                modifier = Modifier.padding(end = 4.dp),
-                                color = Color.Red,
-                                fontSize = 12.sp,
-                            )
-                            Icon(
-                                Icons.Default.Warning,
-                                contentDescription = null,
-                                tint = Color.Red,
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .padding(end = 8.dp)
-                            )
-                        }
+//                        Row(verticalAlignment = Alignment.CenterVertically) {
+//                            Text(
+//                                text = "Inventory Low",
+//                                modifier = Modifier.padding(end = 4.dp),
+//                                color = Color.Red,
+//                                fontSize = 12.sp,
+//                            )
+//                            Icon(
+//                                Icons.Default.Warning,
+//                                contentDescription = null,
+//                                tint = Color.Red,
+//                                modifier = Modifier
+//                                    .size(16.dp)
+//                                    .padding(end = 8.dp)
+//                            )
+//                        }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
