@@ -5,10 +5,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import com.tubebuddy.app.screens.insertEntry
-import com.tubebuddy.app.screens.insertScheduleEntry
 import com.tubebuddy.app.screens.mapEntry
 import java.time.LocalDateTime
 
+//serializer helper
 fun LocalDateTime.toFirestoreTimeMap(): Map<String, Int> = mapOf(
     "year" to year,
     "monthValue" to monthValue,
@@ -18,6 +18,7 @@ fun LocalDateTime.toFirestoreTimeMap(): Map<String, Int> = mapOf(
     "second" to second
 )
 
+//serializer
 fun entryToFirestoreMap(currEntry: Entry): Map<String, Any?> {
     val base = mutableMapOf<String, Any?>(
         "_kind" to when (currEntry) {
@@ -45,14 +46,13 @@ fun entryToFirestoreMap(currEntry: Entry): Map<String, Any?> {
             base["_medType"] = currEntry._medType.toString()
             base["_medicationName"] = currEntry._medicationName
         }
-        is FlushEntry -> { /* no extra fields */ }
     }
 
     return base
 }
 
-
-fun pushScheduleItemToFirestore(schedItem: Entry) {
+//uploads schedule item one at a time to FB
+fun pushScheduleItemFB(schedItem: Entry) {
     val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
     val db = Firebase.firestore
     val itemMap = entryToFirestoreMap(schedItem)
@@ -67,6 +67,7 @@ fun pushScheduleItemToFirestore(schedItem: Entry) {
         }
 }
 
+//uploads log item one at a time to FB
 fun pushLogItemToFirestore(schedItem: Entry) {
     val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
     val db = Firebase.firestore
@@ -82,8 +83,8 @@ fun pushLogItemToFirestore(schedItem: Entry) {
         }
 }
 
+//Loads all log items from FB
 fun loadLogItemsFromFB(){
-
     val uid = FirebaseAuth.getInstance().currentUser?.uid
     val db = Firebase.firestore
 
@@ -112,6 +113,7 @@ fun loadLogItemsFromFB(){
     }
 }
 
+//Deletes a single schedule entry from FB
 fun deleteScheduleItemFB(item: Entry) {
     val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
     val db = Firebase.firestore
@@ -122,6 +124,7 @@ fun deleteScheduleItemFB(item: Entry) {
         .update("scheduleItems", FieldValue.arrayRemove(itemMap))
 }
 
+//Deletes a single log entry from FB
 fun deleteLogItemFB(item: Entry) {
     val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
     val db = Firebase.firestore
@@ -132,6 +135,7 @@ fun deleteLogItemFB(item: Entry) {
         .update("logItems", FieldValue.arrayRemove(itemMap))
 }
 
+//Refreshes state of check boxes for to-do list style schedule interface
 fun refreshItemCheckedMapFromSchedule() {
     itemCheckedMap.clear()
     _schedule.forEach { entry ->
