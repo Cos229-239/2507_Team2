@@ -53,6 +53,7 @@ import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +67,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.firestore
 import com.tubebuddy.app.ui.components.Entry
 import com.tubebuddy.app.ui.components.EntryType
 import com.tubebuddy.app.ui.components.EntryUnits
@@ -79,6 +84,10 @@ import com.tubebuddy.app.ui.components.MedicationEntry
 import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components._entryLog
 import com.tubebuddy.app.ui.components._medLog
+import com.tubebuddy.app.ui.components._schedule
+import com.tubebuddy.app.ui.components.deleteLogItemFB
+import com.tubebuddy.app.ui.components.isNewDay
+import com.tubebuddy.app.ui.components.pushLogItemToFirestore
 import kotlinx.coroutines.launch
 import java.time.DateTimeException
 import java.time.LocalDate
@@ -210,6 +219,12 @@ fun FeedingLogScreen() {
         is24Hour = false,
     )
 
+    LaunchedEffect(Unit) {
+        if (_schedule.isEmpty() && _entryLog.isEmpty()) {
+            loadItemsFromFB()
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -275,6 +290,7 @@ fun FeedingLogScreen() {
                 LogEntryDetailSheet(
                     logTappedCard!!,
                     onDelete = {
+                        logTappedCard?.let { deleteLogItemFB(it) }
                         _entryLog.remove(logTappedCard)
                         logTappedCard = null
                     },
@@ -649,7 +665,7 @@ fun FeedingLogScreen() {
                                         FeedType.ORAL
                                     }
 
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         FeedEntry(
                                             EntryType.FEED,
                                             false,
@@ -670,7 +686,7 @@ fun FeedingLogScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 1) {
                                     //flush
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         FlushEntry(
                                             EntryType.FLUSH,
                                             false,
@@ -690,7 +706,7 @@ fun FeedingLogScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 2) {
                                     //medication
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         MedicationEntry(
                                             EntryType.MEDICINE,
                                             false,
@@ -777,6 +793,20 @@ fun insertEntry(entry: Entry){
     else{
         _entryLog.add(insertIndex, entry)
     }
+}
+
+fun insertEntryAndFB(entry: Entry){
+    //find index to insert
+    val insertIndex = _entryLog.indexOfFirst { it._time.isAfter(entry._time) }
+
+    if (insertIndex < 0){
+        _entryLog.add(entry)
+    }
+    else{
+        _entryLog.add(insertIndex, entry)
+    }
+
+    pushLogItemToFirestore(entry)
 }
 
 //Generate Log Buddy Cards

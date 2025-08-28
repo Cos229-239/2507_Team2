@@ -17,13 +17,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.materialIcon
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -54,7 +52,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,10 +69,14 @@ import androidx.compose.ui.unit.sp
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.material.icons.filled.Cached
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Replay5
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.firestore
 import com.tubebuddy.app.ui.components.Entry
 import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components.EntryType
@@ -87,14 +88,20 @@ import com.tubebuddy.app.ui.components.FlushEntry
 import com.tubebuddy.app.ui.components.MedEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
+import com.tubebuddy.app.ui.components._entryLog
 import com.tubebuddy.app.ui.components._medLog
 import com.tubebuddy.app.ui.components._schedule
+import com.tubebuddy.app.ui.components.deleteScheduleItemFB
+import com.tubebuddy.app.ui.components.entryToFirestoreMap
 import com.tubebuddy.app.ui.components.isNewDay
 import com.tubebuddy.app.ui.components.itemCheckedMap
+import com.tubebuddy.app.ui.components.loadLogItemsFromFB
+import com.tubebuddy.app.ui.components.pushScheduleItemToFirestore
+import com.tubebuddy.app.ui.components.refreshItemCheckedMapFromSchedule
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 //Schedule Detail Sheet
@@ -304,6 +311,9 @@ fun ScheduleScreen() {
     //code that runs each time the schedule screen appears
     //check if its a new day to clear old (non-repeating) schedule items
     LaunchedEffect(Unit) {
+        if (_schedule.isEmpty() && _entryLog.isEmpty()) {
+            loadItemsFromFB()
+        }
         if (isNewDay(schedContext)){
             newDayClearCompleteEntries(schedContext)
         }
@@ -314,6 +324,16 @@ fun ScheduleScreen() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
+        val didSanitize = rememberSaveable { mutableStateOf(false) }
+
+        LaunchedEffect(_schedule.size) {
+            if (!didSanitize.value && _schedule.isNotEmpty()) {
+                dedupeSchedule()                 // remove one-time dupes
+                refreshItemCheckedMapFromSchedule()      // mirror to legacy map for UI
+                saveFullScheduleToFirestore()            // persist cleaned array
+                didSanitize.value = true                 // run only once per app start
+            }
+        }
         //if log is empty display basic text
         if (_schedule.isEmpty())
             Text(text = "No Scheduled Items", fontSize = 30.sp, color = MaterialTheme.colorScheme.onPrimary)
@@ -326,7 +346,7 @@ fun ScheduleScreen() {
             ) {
                 //displays each entry in log
                 items(_schedule) {
-                    scheduledItem -> val isItChecked = itemCheckedMap.getOrDefault(scheduledItem, false)
+                    scheduledItem -> val isItChecked = itemCheckedMap.getOrDefault(scheduledItem, scheduledItem._checked)
 
                     //filter
                     if (_currFilter.value!= FilterType.ALL_FILTER){
@@ -344,65 +364,80 @@ fun ScheduleScreen() {
                         }
                     }
 
-                    ScheduleBuddyCard(scheduledItem, modifier = Modifier
-                    .size(width = 380.dp, height = 94.dp)
-                    .padding(bottom = 18.dp)
-                    .clickable { tappedCard = scheduledItem },
+                    ScheduleBuddyCard(
+                        scheduledItem,
+                        modifier = Modifier
+                            .size(width = 380.dp, height = 94.dp)
+                            .padding(bottom = 18.dp)
+                            .clickable { tappedCard = scheduledItem },
                         isChecked = isItChecked,
-                        onCheckChecked = { isNowChecked -> itemCheckedMap[scheduledItem] = isNowChecked
+                        onCheckChecked = { isNowChecked ->
 
+                            // 1) Update reactive UI state FIRST so the checkbox flips immediately.
+                            itemCheckedMap[scheduledItem] = isNowChecked
+
+                            // 2) Persist on the model (so Firestore gets it too).
+                            scheduledItem._checked = isNowChecked
+
+                            // 3) Preserve your existing behavior: when checked, add a log entry at NOW.
                             if (isNowChecked) {
-                                if (scheduledItem is FeedEntry)
-                                    insertEntry(
+                                when (scheduledItem) {
+                                    is FeedEntry -> insertEntryAndFB(
                                         FeedEntry(
-                                            scheduledItem._type,
+                                            _type = scheduledItem._type,
                                             _complete = true,
                                             _repeats = false,
-                                            scheduledItem._title,
-                                            LocalDateTime.now(),
-                                            scheduledItem._amount,
-                                            scheduledItem._unit,
-                                            scheduledItem._notes,
-                                            scheduledItem._feedType
+                                            _title = scheduledItem._title,
+                                            _time = LocalDateTime.now(),
+                                            _amount = scheduledItem._amount,
+                                            _unit = scheduledItem._unit,
+                                            _notes = scheduledItem._notes,
+                                            _feedType = scheduledItem._feedType
                                         )
                                     )
-                                if (scheduledItem is FlushEntry)
-                                    insertEntry(
+                                    is FlushEntry -> insertEntryAndFB(
                                         FlushEntry(
-                                            scheduledItem._type,
+                                            _type = scheduledItem._type,
                                             _complete = true,
                                             _repeats = false,
-                                            scheduledItem._title,
-                                            LocalDateTime.now(),
-                                            scheduledItem._amount,
-                                            scheduledItem._unit,
-                                            scheduledItem._notes
+                                            _title = scheduledItem._title,
+                                            _time = LocalDateTime.now(),
+                                            _amount = scheduledItem._amount,
+                                            _unit = scheduledItem._unit,
+                                            _notes = scheduledItem._notes
                                         )
                                     )
-                                if (scheduledItem is MedicationEntry)
-                                    insertEntry(
+                                    is MedicationEntry -> insertEntryAndFB(
                                         MedicationEntry(
-                                            scheduledItem._type,
+                                            _type = scheduledItem._type,
                                             _complete = true,
                                             _repeats = false,
-                                            scheduledItem._title,
-                                            LocalDateTime.now(),
-                                            scheduledItem._amount,
-                                            scheduledItem._unit,
-                                            scheduledItem._notes,
-                                            scheduledItem._medType,
-                                            scheduledItem._medicationName
+                                            _title = scheduledItem._title,
+                                            _time = LocalDateTime.now(),
+                                            _amount = scheduledItem._amount,
+                                            _unit = scheduledItem._unit,
+                                            _notes = scheduledItem._notes,
+                                            _medType = scheduledItem._medType,
+                                            _medicationName = scheduledItem._medicationName
                                         )
                                     )
+                                }
                             }
 
+                            // 4) Write the ENTIRE schedule array once — this avoids the
+                            //    "legacy object without _checked could not be removed" problem
+                            //    that caused one-time duplicates after migration.
+                            saveFullScheduleToFirestore()
+
                         }
-                        )
+                    )
+
+
                 }
             }
         }
 
-
+/*
         //remove this button, for testing only
 
         FloatingActionButton(
@@ -430,6 +465,7 @@ fun ScheduleScreen() {
             Text(text = "New Day", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
         }
 
+ */
 
         //Add new Schedule Item Button
         FloatingActionButton(
@@ -452,6 +488,7 @@ fun ScheduleScreen() {
             ) {
                 EntryDetailSheet(tappedCard!!,
                     onDelete = {
+                        tappedCard?.let { deleteScheduleItemFB(it) }
                         _schedule.remove(tappedCard)
                         tappedCard = null
                     },
@@ -741,7 +778,7 @@ fun ScheduleScreen() {
                                         FeedType.ORAL
                                     }
 
-                                    insertScheduleEntry(
+                                    insertScheduleEntryAndFB(
                                         FeedEntry(
                                             EntryType.FEED,
                                             false,
@@ -762,7 +799,7 @@ fun ScheduleScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 1) {
                                     //flush
-                                    insertScheduleEntry(
+                                    insertScheduleEntryAndFB(
                                         FlushEntry(
                                             EntryType.FLUSH,
                                             false,
@@ -782,7 +819,7 @@ fun ScheduleScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 2) {
                                     //medication
-                                    insertScheduleEntry(
+                                    insertScheduleEntryAndFB(
                                         MedicationEntry(
                                             EntryType.MEDICINE,
                                             false,
@@ -966,6 +1003,20 @@ fun insertScheduleEntry(entry: Entry){
     }
 }
 
+fun insertScheduleEntryAndFB(entry: Entry){
+    //find index to insert
+    val insertIndex = _schedule.indexOfFirst { it._time.isAfter(entry._time) }
+
+    if (insertIndex < 0){
+        _schedule.add(entry)
+    }
+    else{
+        _schedule.add(insertIndex, entry)
+    }
+
+    pushScheduleItemToFirestore(entry)
+}
+
 fun scheduleFormatShortTime(dateTime: LocalDateTime): String {
     val minute = dateTime.minute.toString().padStart(2, '0')
     return when {
@@ -977,20 +1028,28 @@ fun scheduleFormatShortTime(dateTime: LocalDateTime): String {
 }
 
 fun newDayClearCompleteEntries(context: Context) {
-    val entriesToRemove = itemCheckedMap.filter { (entry, isChecked) ->
-        isChecked && !entry._repeats
-    }.keys
-
-    _schedule.removeAll(entriesToRemove)
-
-    entriesToRemove.forEach {
-        itemCheckedMap.remove(it)
+    val toRemove = _schedule.filter { it._checked && !it._repeats }
+    if (toRemove.isNotEmpty()) {
+        _schedule.removeAll(toRemove)
     }
+    _schedule.filter { it._repeats && it._checked }.forEach { it._checked = false }
 
-    //reset checkboxes for repeating entries
-    itemCheckedMap.keys.filter { it._repeats }.forEach {
-        itemCheckedMap[it] = false
-    }
+    refreshItemCheckedMapFromSchedule()
+
+    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val db = FirebaseFirestore.getInstance()
+
+    val mapped = _schedule.map { entryToFirestoreMap(it) }
+
+    // update or merge if cant
+    db.collection("users")
+        .document(uid)
+        .update("scheduleItems", mapped)
+        .addOnFailureListener {
+            db.collection("users")
+                .document(uid)
+                .set(mapOf("scheduleItems" to mapped), SetOptions.merge())
+        }
 }
 
 fun clearAndPopulateWithStandardItems(){
@@ -1070,4 +1129,93 @@ fun clearAndPopulateWithStandardItems(){
         _medType = MedType.ORAL,
         _medicationName = "Tylenol"
     ))
+}
+
+
+fun loadItemsFromFB(){
+
+    _entryLog.clear()
+    _schedule.clear()
+    loadLogItemsFromFB()
+
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+    val db = Firebase.firestore
+
+    uid?.let {
+        db.collection("users")
+            .document(it)
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                if(documentSnapshot.exists()) {
+                    val items = documentSnapshot.get("scheduleItems") as? List<Map<String, Any>>
+                    if(items != null) {
+                        val entryList = mutableListOf<Entry>()
+                        for(itemMap in items) {
+                            val entry = mapEntry(itemMap)
+                            if(entry !=null) {
+                                entryList.add(entry)
+                            }
+                        }
+
+                        for (newItem in entryList){
+                            insertScheduleEntry(newItem)
+                        }
+                    }
+                }
+            }
+    }
+}
+
+private fun saveFullScheduleToFirestore() {
+    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val db = FirebaseFirestore.getInstance()
+
+    // Always write mapped objects; ensures _checked and time are serialized correctly.
+    val mapped = _schedule.map { entryToFirestoreMap(it) }
+
+    db.collection("users")
+        .document(uid)
+        .update("scheduleItems", mapped)
+}
+
+private fun dedupeSchedule() {
+    if (_schedule.size <= 1) return
+
+    val fmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    fun sig(entry: Entry): String {
+        val common = listOf(
+            entry._type.name,
+            entry._title.trim(),
+            entry._time.format(fmt),
+            entry._amount.toString(),
+            entry._unit.name,
+            entry._notes.trim()
+        )
+        val extra = when (entry) {
+            is FeedEntry -> listOf("F", entry._feedType.name)
+            is MedicationEntry -> listOf("M", entry._medType.name, entry._medicationName ?: "")
+            is FlushEntry -> listOf("L")
+            else -> emptyList()
+        }
+        return (common + extra).joinToString("|")
+    }
+
+    val keep = LinkedHashMap<String, Entry>()
+    for (e in _schedule) {
+        val k = sig(e)
+        val existing = keep[k]
+        if (existing == null) {
+            keep[k] = e
+        } else {
+            // Prefer the one that's checked; otherwise keep the first.
+            if (!existing._checked && e._checked) {
+                keep[k] = e
+            }
+        }
+    }
+    if (keep.size != _schedule.size) {
+        _schedule.clear()
+        _schedule.addAll(keep.values)
+        refreshItemCheckedMapFromSchedule()
+    }
 }
