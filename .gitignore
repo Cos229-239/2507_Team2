@@ -57,7 +57,8 @@ Thumbs.db
 **/compose-compiler/
 
 # Firebase
-google-services.json
+app/google-services.json
+app/proguard-rules.pro
 GoogleService-Info.plist
 fabric.properties
 crashlytics.properties

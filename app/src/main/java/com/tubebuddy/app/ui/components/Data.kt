@@ -1,11 +1,20 @@
 package com.tubebuddy.app.ui.components
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import java.time.LocalDateTime
 
+val itemCheckedMap = mutableStateMapOf<Entry, Boolean>()
 
 enum class EntryType{
     FEED, FLUSH, MEDICINE
+}
+
+enum class FilterType {
+    ALL_FILTER, FEED_FILTER, FLUSH_FILTER, MEDICINE_FILTER
 }
 
 enum class EntryUnits{
@@ -69,6 +78,7 @@ data class MedicationEntry(
 
 val _schedule = mutableStateListOf<Entry>()
 val _entryLog = mutableStateListOf<Entry>()
+var _currFilter = mutableStateOf(FilterType.ALL_FILTER)
 
 
 //// Site Care Data ////

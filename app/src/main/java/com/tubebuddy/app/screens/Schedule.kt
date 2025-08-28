@@ -17,15 +17,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.materialIcon
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -51,6 +54,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,52 +63,47 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.material.icons.filled.Cached
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Replay5
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
 import com.tubebuddy.app.ui.components.Entry
+import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components.EntryType
 import com.tubebuddy.app.ui.components.EntryUnits
 import com.tubebuddy.app.ui.components.FeedEntry
+import com.tubebuddy.app.ui.components.FilterType
 import com.tubebuddy.app.ui.components.FeedType
 import com.tubebuddy.app.ui.components.FlushEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
 import com.tubebuddy.app.ui.components._schedule
+import com.tubebuddy.app.ui.components.isNewDay
+import com.tubebuddy.app.ui.components.itemCheckedMap
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import kotlin.math.roundToInt
 
 //Schedule Detail Sheet
 @Composable
 fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
-    val actualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
-    val medActualAmountSliderValue = remember(entry) { mutableStateOf(entry._amount.toFloat()) }
-    var timeString by remember { mutableStateOf("") }
-    var minuteString by remember { mutableStateOf("") }
+    val actualAmountSliderValue = remember(entry) { mutableFloatStateOf(entry._amount.toFloat()) }
+    val medActualAmountSliderValue = remember(entry) { mutableFloatStateOf(entry._amount.toFloat()) }
 
-    if (entry._time.minute < 10){
-        minuteString = '0' + entry._time.minute.toString()
-    }
-    else{
-        minuteString = entry._time.minute.toString()
-    }
-
-    if (entry._time.hour == 0){
-        timeString = "12:" + minuteString + " AM"
-    }
-    else if (entry._time.hour > 12){
-        timeString = (entry._time.hour-12).toString() + ":" + minuteString + " PM"
-    }
-    else if (entry._time.hour == 12){
-        timeString = "12:" + minuteString + " PM"
-    }
-    else{
-        timeString = entry._time.hour.toString() + ":" + minuteString + " AM"
-    }
+    //context to be used to check if it is a new day
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -130,7 +129,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(text = timeString,
+                    Text(text = logFormatTime(entry._time),
                         fontSize = 18.sp,
                         color = Color.White,
                         fontWeight = FontWeight.Medium)
@@ -139,8 +138,21 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Text("Title: ${entry._title}", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
-
+            Row {
+                Text(
+                    "Title: ${entry._title}",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium
+                )
+                if (entry._repeats) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = "Repeat",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .5f),
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+            }
             Row {
                 Text("Type: ${entry._type}", color = MaterialTheme.colorScheme.onPrimary)
 
@@ -161,8 +173,8 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             if (entry._type == EntryType.MEDICINE){
 
                 Slider(
-                    value = medActualAmountSliderValue.value,
-                    onValueChange = { medActualAmountSliderValue.value = it },
+                    value = medActualAmountSliderValue.floatValue,
+                    onValueChange = { medActualAmountSliderValue.floatValue = it.roundToInt().toFloat() },
                     valueRange = 0f..10f,
                     steps = 9,
                     colors = SliderDefaults.colors(
@@ -173,15 +185,15 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                         inactiveTickColor = MaterialTheme.colorScheme.tertiary,
                     )
                 )
-                Text(text = medActualAmountSliderValue.value.roundToInt().toString() + " mg", color = MaterialTheme.colorScheme.onSurface)
+                Text(text = medActualAmountSliderValue.floatValue.roundToInt().toString() + " mg", color = MaterialTheme.colorScheme.onSurface)
             }
             else{
 
                 Slider(
-                    value = actualAmountSliderValue.value,
-                    onValueChange = { actualAmountSliderValue.value = it },
+                    value = actualAmountSliderValue.floatValue,
+                    onValueChange = { actualAmountSliderValue.floatValue = it.roundToInt().toFloat() },
                     valueRange = 0f..100f,
-                    steps = 99,
+                    steps = 0,
                     colors = SliderDefaults.colors(
                         thumbColor = MaterialTheme.colorScheme.tertiary,
                         activeTrackColor = MaterialTheme.colorScheme.tertiary,
@@ -190,7 +202,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
                         inactiveTickColor = MaterialTheme.colorScheme.tertiary,
                     )
                 )
-                Text(text = actualAmountSliderValue.value.roundToInt().toString() + " mL", color = MaterialTheme.colorScheme.onSurface)
+                Text(text = actualAmountSliderValue.floatValue.roundToInt().toString() + " mL", color = MaterialTheme.colorScheme.onSurface)
             }
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -203,19 +215,19 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             Button(
                 onClick = {
                     if (entry is FeedEntry)
-                        insertEntry(FeedEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._feedType))
+                        insertEntry(FeedEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.floatValue.toDouble(), entry._unit, entry._notes, entry._feedType))
                     if (entry is FlushEntry)
-                        insertEntry(FlushEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.value.toDouble(), entry._unit, entry._notes))
+                        insertEntry(FlushEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), actualAmountSliderValue.floatValue.toDouble(), entry._unit, entry._notes))
                     if (entry is MedicationEntry)
-                        insertEntry(MedicationEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), medActualAmountSliderValue.value.toDouble(), entry._unit, entry._notes, entry._medType, entry._medicationName))
+                        insertEntry(MedicationEntry(entry._type, _complete = true, _repeats = false, entry._title, LocalDateTime.now(), medActualAmountSliderValue.floatValue.toDouble(), entry._unit, entry._notes, entry._medType, entry._medicationName))
 
                     onDismiss()
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(81,130,66),
+                    containerColor = MaterialTheme.colorScheme.tertiary,
                     contentColor = Color.White,
                 ), modifier = Modifier.weight(0.75f)
-                    .padding(16.dp)
+                    .padding(start=16.dp)
                     .height(50.dp)
                     .shadow(5.dp, shape = RoundedCornerShape(8.dp)), shape = RoundedCornerShape(8.dp)
             ) {
@@ -229,10 +241,10 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
             Button(
                 onClick = onDelete,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(186,26,26),
+                    containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = Color.White,
             ), modifier = Modifier.weight(0.25f)
-                .padding(16.dp)
+                .padding(start = 16.dp,end = 16.dp)
                 .height(50.dp)
                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)), shape = RoundedCornerShape(8.dp)) {
                 Icon(
@@ -249,8 +261,7 @@ fun EntryDetailSheet(entry: Entry, onDelete:()->Unit, onDismiss:()->Unit) {
 @Composable
 fun ScheduleScreen() {
 
-    //context for toast
-    //val context = LocalContext.current
+    val schedContext = LocalContext.current
 
     //sheet
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -287,13 +298,21 @@ fun ScheduleScreen() {
         is24Hour = false,
     )
 
+    //code that runs each time the schedule screen appears
+    //check if its a new day to clear old (non-repeating) schedule items
+    LaunchedEffect(Unit) {
+        if (isNewDay(schedContext)){
+            newDayClearCompleteEntries(schedContext)
+        }
+    }
+
     //Main Schedule Screen
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         //if log is empty display basic text
-        if (!(_schedule.size >= 1))
+        if (_schedule.isEmpty())
             Text(text = "No Scheduled Items", fontSize = 30.sp, color = MaterialTheme.colorScheme.onPrimary)
         else{
             LazyColumn(
@@ -304,13 +323,110 @@ fun ScheduleScreen() {
             ) {
                 //displays each entry in log
                 items(_schedule) {
-                    entry->ScheduleBuddyCard(entry, modifier = Modifier
+                    scheduledItem -> val isItChecked = itemCheckedMap.getOrDefault(scheduledItem, false)
+
+                    //filter
+                    if (_currFilter.value!= FilterType.ALL_FILTER){
+                        if (_currFilter.value==FilterType.FEED_FILTER){
+                            if (scheduledItem._type != EntryType.FEED)
+                                return@items
+                        }
+                        if (_currFilter.value==FilterType.FLUSH_FILTER){
+                            if (scheduledItem._type != EntryType.FLUSH)
+                                return@items
+                        }
+                        if (_currFilter.value==FilterType.MEDICINE_FILTER){
+                            if (scheduledItem._type != EntryType.MEDICINE)
+                                return@items
+                        }
+                    }
+
+                    ScheduleBuddyCard(scheduledItem, modifier = Modifier
                     .size(width = 380.dp, height = 94.dp)
                     .padding(bottom = 18.dp)
-                    .clickable { tappedCard = entry })
+                    .clickable { tappedCard = scheduledItem },
+                        isChecked = isItChecked,
+                        onCheckChecked = { isNowChecked -> itemCheckedMap[scheduledItem] = isNowChecked
+
+                            if (isNowChecked) {
+                                if (scheduledItem is FeedEntry)
+                                    insertEntry(
+                                        FeedEntry(
+                                            scheduledItem._type,
+                                            _complete = true,
+                                            _repeats = false,
+                                            scheduledItem._title,
+                                            LocalDateTime.now(),
+                                            scheduledItem._amount,
+                                            scheduledItem._unit,
+                                            scheduledItem._notes,
+                                            scheduledItem._feedType
+                                        )
+                                    )
+                                if (scheduledItem is FlushEntry)
+                                    insertEntry(
+                                        FlushEntry(
+                                            scheduledItem._type,
+                                            _complete = true,
+                                            _repeats = false,
+                                            scheduledItem._title,
+                                            LocalDateTime.now(),
+                                            scheduledItem._amount,
+                                            scheduledItem._unit,
+                                            scheduledItem._notes
+                                        )
+                                    )
+                                if (scheduledItem is MedicationEntry)
+                                    insertEntry(
+                                        MedicationEntry(
+                                            scheduledItem._type,
+                                            _complete = true,
+                                            _repeats = false,
+                                            scheduledItem._title,
+                                            LocalDateTime.now(),
+                                            scheduledItem._amount,
+                                            scheduledItem._unit,
+                                            scheduledItem._notes,
+                                            scheduledItem._medType,
+                                            scheduledItem._medicationName
+                                        )
+                                    )
+                            }
+
+                        }
+                        )
                 }
             }
         }
+
+        //remove this button, for testing only
+        /*
+        FloatingActionButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp, end = 285.dp),
+            onClick = { clearAndPopulateWithStandardItems() },
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.tertiary
+        ) {
+            Text(text = "Populate", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
+        }
+         */
+
+        //remove this button, for testing new day only
+        /*
+        FloatingActionButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp, end = 100.dp),
+            onClick = { newDayClearCompleteEntries(schedContext) },
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.tertiary
+        ) {
+            Text(text = "Test New Day", fontSize = 24.sp, modifier = Modifier.padding(10.dp))
+        }
+         */
+
 
         //Add new Schedule Item Button
         FloatingActionButton(
@@ -470,9 +586,9 @@ fun ScheduleScreen() {
                         //-----------mL Amount Slider
                         Slider(
                             value = amountSliderValue,
-                            onValueChange = { amountSliderValue = it },
+                            onValueChange = { amountSliderValue = it.roundToInt().toFloat() },
                             valueRange = 0f..100f,
-                            steps = 99,
+                            steps = 0,
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.tertiary,
                                 activeTrackColor = MaterialTheme.colorScheme.tertiary,
@@ -490,7 +606,7 @@ fun ScheduleScreen() {
                         //-----------mg (medication) Amount Slider
                         Slider(
                             value = medAmountSliderValue,
-                            onValueChange = { medAmountSliderValue = it },
+                            onValueChange = { medAmountSliderValue = it.roundToInt().toFloat() },
                             valueRange = 0f..10f,
                             steps = 9,
                             colors = SliderDefaults.colors(
@@ -600,6 +716,16 @@ fun ScheduleScreen() {
                         Button(
                             onClick = {
 
+                                if (newLogName.isEmpty()){
+                                    Toast.makeText(schedContext, "Please enter a title", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+
+                                if (newItemCategoriesSelectedIndex == 2 && selectedMedication.isBlank()){
+                                    Toast.makeText(schedContext, "Please select a medication.", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+
                                 if (newItemCategoriesSelectedIndex == 0) {
                                     //feed entry
                                     val selectedFeedType = if (newFeedSelectedIndex == 0) {
@@ -683,7 +809,7 @@ fun ScheduleScreen() {
 
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(81, 130, 66),
+                                containerColor = MaterialTheme.colorScheme.tertiary,
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.75f)
@@ -709,11 +835,11 @@ fun ScheduleScreen() {
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(186, 26, 26),
+                                containerColor = MaterialTheme.colorScheme.surface,
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier.weight(0.25f)
-                                .padding(16.dp)
+                                .padding(top = 16.dp, end=16.dp)
                                 .height(50.dp)
                                 .shadow(5.dp, shape = RoundedCornerShape(8.dp)),
                             shape = RoundedCornerShape(8.dp)
@@ -722,7 +848,7 @@ fun ScheduleScreen() {
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "Cancel"
                             )
-                            Text("Cancel")
+                            //Text("Cancel")
                         }
                     }
                 }
@@ -734,7 +860,12 @@ fun ScheduleScreen() {
 
 //Generate Schedule Buddy Cards
 @Composable
-fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
+fun ScheduleBuddyCard(entry: Entry,
+                      modifier: Modifier = Modifier,
+                      isChecked: Boolean,
+                      onCheckChecked: (Boolean) -> Unit) {
+
+    Row{
 
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -752,7 +883,7 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     .size(width = 64.dp, height = 56.dp)
                     .padding(start = 8.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = if (isChecked) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f) else MaterialTheme.colorScheme.primary
                 )
             ) {
                 Column(
@@ -770,12 +901,26 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                 }
             }
             Column {
-                Text(
-                    text = entry._title,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+
+                Row {
+                    Text(
+                        text = entry._title,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        modifier = Modifier.padding(start = 8.dp),
+                        textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None
+                    )
+
+                    if (entry._repeats) {
+                        Icon(
+                            imageVector = Icons.Default.Cached,
+                            contentDescription = "Repeat",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .5f),
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
+                }
+
                 Row {
                     Text(
                         text = entry._type.toString(),
@@ -783,7 +928,7 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                         color = MaterialTheme.colorScheme.onSecondary,
                         modifier = Modifier.padding(start = 8.dp)
                     )
-                    if (entry is FeedEntry){
+                    if (entry is FeedEntry) {
                         Text(
                             text = " • " + entry._feedType.toString(),
                             fontSize = 12.sp,
@@ -792,7 +937,17 @@ fun ScheduleBuddyCard(entry: Entry, modifier: Modifier = Modifier) {
                     }
                 }
             }
+            Row(modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+                ) {
+                Checkbox(
+                    checked = isChecked,
+                    onCheckedChange = onCheckChecked
+                )
+            }
         }
+    }
     }
 }
 
@@ -816,4 +971,100 @@ fun scheduleFormatShortTime(dateTime: LocalDateTime): String {
         dateTime.hour > 12 -> "${dateTime.hour - 12}p"
         else -> "${dateTime.hour}a"
     }
+}
+
+fun newDayClearCompleteEntries(context: Context) {
+    val entriesToRemove = itemCheckedMap.filter { (entry, isChecked) ->
+        isChecked && !entry._repeats
+    }.keys
+
+    _schedule.removeAll(entriesToRemove)
+
+    entriesToRemove.forEach {
+        itemCheckedMap.remove(it)
+    }
+
+    //reset checkboxes for repeating entries
+    itemCheckedMap.keys.filter { it._repeats }.forEach {
+        itemCheckedMap[it] = false
+    }
+}
+
+fun clearAndPopulateWithStandardItems(){
+    val today = LocalDate.now()
+
+    _schedule.clear()
+
+    insertScheduleEntry (FeedEntry(
+        _type = EntryType.FEED,
+        _complete = false,
+        _repeats = true,
+        _title = "Morning Feed",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 9,0),
+        _amount = 50.0,
+        _unit = EntryUnits.mL,
+        _notes = "",
+        _feedType = FeedType.BOLUS
+    ))
+
+    insertScheduleEntry (FeedEntry(
+        _type = EntryType.FEED,
+        _complete = false,
+        _repeats = false,
+        _title = "Mid-Day Feed",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 12,0),
+        _amount = 50.0,
+        _unit = EntryUnits.mL,
+        _notes = "Afternoon Note",
+        _feedType = FeedType.PUMP
+    ))
+
+    insertScheduleEntry( FeedEntry(
+        _type = EntryType.FEED,
+        _complete = false,
+        _repeats = true,
+        _title = "Evening Feed",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 18,0),
+        _amount = 50.0,
+        _unit = EntryUnits.mL,
+        _notes = "",
+        _feedType = FeedType.GRAVITY
+    ))
+
+
+    insertScheduleEntry( FlushEntry(
+        _type = EntryType.FLUSH,
+        _complete = false,
+        _repeats = false,
+        _title = "Afternoon Flush",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 13,0),
+        _amount = 10.0,
+        _unit = EntryUnits.mL,
+        _notes = ""
+    ))
+
+    insertScheduleEntry( FlushEntry(
+        _type = EntryType.FLUSH,
+        _complete = false,
+        _repeats = false,
+        _title = "One-Time Evening Flush",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 19,0),
+        _amount = 20.0,
+        _unit = EntryUnits.mL,
+        _notes = "Flush after feed"
+    ))
+
+    // --- Medication Entry (repeating) ---
+    insertScheduleEntry( MedicationEntry(
+        _type = EntryType.MEDICINE,
+        _complete = false,
+        _repeats = true,
+        _title = "Mid-Day Medication",
+        _time = LocalDateTime.of(today.year, today.month, today.dayOfMonth , 14,0),
+        _amount = 5.0,
+        _unit = EntryUnits.mg,
+        _notes = "",
+        _medType = MedType.ORAL,
+        _medicationName = "Tylenol"
+    ))
 }
