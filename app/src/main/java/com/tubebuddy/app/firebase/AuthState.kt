@@ -13,5 +13,6 @@ sealed class AuthState {
 data class User(
     val name: String = "",
     val email: String = "",
-    val createdAt: Timestamp? = null
+    val createdAt: Timestamp? = null,
+    val onBoardComplete: Boolean = false,
 )

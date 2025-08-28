@@ -25,9 +25,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,9 +37,23 @@ import com.tubebuddy.app.ui.components.Entry
 import com.tubebuddy.app.ui.components.FeedEntry
 import com.tubebuddy.app.ui.components._entryLog
 import com.tubebuddy.app.ui.components._schedule
+import com.tubebuddy.app.ui.components.isNewDay
 
 @Composable
 fun HomeScreen() {
+
+    val homeContext = LocalContext.current
+
+    LaunchedEffect(Unit) {
+
+        if (_schedule.isEmpty() && _entryLog.isEmpty()) {
+            loadItemsFromFB()
+        }
+        if (isNewDay(homeContext)){
+            newDayClearCompleteEntries(homeContext)
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier

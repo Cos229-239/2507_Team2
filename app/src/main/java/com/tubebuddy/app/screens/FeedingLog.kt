@@ -53,6 +53,7 @@ import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +67,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.firestore
 import com.tubebuddy.app.ui.components.Entry
 import com.tubebuddy.app.ui.components.EntryType
 import com.tubebuddy.app.ui.components.EntryUnits
@@ -73,10 +78,16 @@ import com.tubebuddy.app.ui.components.FeedEntry
 import com.tubebuddy.app.ui.components.FeedType
 import com.tubebuddy.app.ui.components.FilterType
 import com.tubebuddy.app.ui.components.FlushEntry
+import com.tubebuddy.app.ui.components.MedEntry
 import com.tubebuddy.app.ui.components.MedType
 import com.tubebuddy.app.ui.components.MedicationEntry
 import com.tubebuddy.app.ui.components._currFilter
 import com.tubebuddy.app.ui.components._entryLog
+import com.tubebuddy.app.ui.components._medLog
+import com.tubebuddy.app.ui.components._schedule
+import com.tubebuddy.app.ui.components.deleteLogItemFB
+import com.tubebuddy.app.ui.components.isNewDay
+import com.tubebuddy.app.ui.components.pushLogItemToFirestore
 import kotlinx.coroutines.launch
 import java.time.DateTimeException
 import java.time.LocalDate
@@ -184,8 +195,9 @@ fun FeedingLogScreen() {
 
     //Medication Dropdown
     var medDDExpanded by remember { mutableStateOf(false) }
-    val medicationOptions = listOf("Advil","Tylenol","Aspirin")
-    var selectedMedication by remember { mutableStateOf("") }
+    var selectedMedication by remember { mutableStateOf<MedEntry>(object : MedEntry {
+        override val _name: String = ""
+    }) }
 
     //Date Entry
     var selectedMonth by remember { mutableStateOf(MonthList.entries[LocalDate.now().monthValue - 1]) }
@@ -206,6 +218,12 @@ fun FeedingLogScreen() {
         initialMinute = currentTime.get(Calendar.MINUTE),
         is24Hour = false,
     )
+
+    LaunchedEffect(Unit) {
+        if (_schedule.isEmpty() && _entryLog.isEmpty()) {
+            loadItemsFromFB()
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -272,6 +290,7 @@ fun FeedingLogScreen() {
                 LogEntryDetailSheet(
                     logTappedCard!!,
                     onDelete = {
+                        logTappedCard?.let { deleteLogItemFB(it) }
                         _entryLog.remove(logTappedCard)
                         logTappedCard = null
                     },
@@ -369,7 +388,7 @@ fun FeedingLogScreen() {
                         ) {
                             OutlinedTextField(
                                 readOnly = true,
-                                value = selectedMedication,
+                                value = selectedMedication._name,
                                 onValueChange = {},
                                 label = {Text("Select a Medication")},
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = medDDExpanded)},
@@ -386,10 +405,10 @@ fun FeedingLogScreen() {
                                 expanded = medDDExpanded,
                                 onDismissRequest = {medDDExpanded = false}
                             ) {
-                                medicationOptions.forEach{
+                                _medLog.forEach{
                                         options->
                                     DropdownMenuItem(
-                                        text = {Text(options, color = MaterialTheme.colorScheme.surface)},
+                                        text = {Text(options._name, color = MaterialTheme.colorScheme.surface)},
                                         onClick = {
                                             selectedMedication = options
                                             medDDExpanded = false
@@ -629,7 +648,7 @@ fun FeedingLogScreen() {
                                     return@Button
                                 }
 
-                                if (newItemCategoriesSelectedIndex == 2 && selectedMedication.isBlank()){
+                                if (newItemCategoriesSelectedIndex == 2 && selectedMedication._name == ""){
                                     Toast.makeText(logContext, "Please select a medication.", Toast.LENGTH_SHORT).show()
                                     return@Button
                                 }
@@ -646,7 +665,7 @@ fun FeedingLogScreen() {
                                         FeedType.ORAL
                                     }
 
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         FeedEntry(
                                             EntryType.FEED,
                                             false,
@@ -667,7 +686,7 @@ fun FeedingLogScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 1) {
                                     //flush
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         FlushEntry(
                                             EntryType.FLUSH,
                                             false,
@@ -687,7 +706,7 @@ fun FeedingLogScreen() {
                                     )
                                 } else if (newItemCategoriesSelectedIndex == 2) {
                                     //medication
-                                    insertEntry(
+                                    insertEntryAndFB(
                                         MedicationEntry(
                                             EntryType.MEDICINE,
                                             false,
@@ -704,7 +723,7 @@ fun FeedingLogScreen() {
                                             EntryUnits.mg,
                                             newNotes,
                                             MedType.ORAL,
-                                            selectedMedication
+                                            selectedMedication._name
                                         )
                                     )
                                 }
@@ -774,6 +793,20 @@ fun insertEntry(entry: Entry){
     else{
         _entryLog.add(insertIndex, entry)
     }
+}
+
+fun insertEntryAndFB(entry: Entry){
+    //find index to insert
+    val insertIndex = _entryLog.indexOfFirst { it._time.isAfter(entry._time) }
+
+    if (insertIndex < 0){
+        _entryLog.add(entry)
+    }
+    else{
+        _entryLog.add(insertIndex, entry)
+    }
+
+    pushLogItemToFirestore(entry)
 }
 
 //Generate Log Buddy Cards
