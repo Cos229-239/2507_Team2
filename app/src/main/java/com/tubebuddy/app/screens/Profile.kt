@@ -389,6 +389,7 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
 
                     // ANJELLYY FAQssss GOO here
 
+                    FAQListContent()
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
